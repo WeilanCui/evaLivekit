@@ -54,18 +54,15 @@ The table below lists all the other API-hosted models.
 
 | Model ID                                    | Provider    | Type | Parameters                  |
 |---------------------------------------------|-------------|------|-----------------------------|
-| gpt-5.2                                     | OpenAI      | LLM  | reasoning: default          |
 | gpt-5.4                                     | OpenAI      | LLM  | reasoning: default          |
 | gpt-5.4-mini                                | OpenAI      | LLM  | reasoning: default          |
 | gpt-realtime-2.0                            | OpenAI      | S2S  | reasoning: default          |
 | gpt-realtime-1.5                            | OpenAI      | S2S  | --                          |
 | gpt-realtime-mini                           | OpenAI      | S2S  | --                          |
-| gemini-3-flash-preview                      | Google      | LLM  | reasoning: default          |
 | gemini-3.1-flash-live-preview               | Google      | LALM | voice: provider default     |
 | gemini-3.1-flash-tts-preview                | Google      | TTS  | voice: provider default     |
-| us.anthropic.claude-opus-4-6-v1             | AWS Bedrock | LLM  | reasoning: default          |
 | us.anthropic.claude-haiku-4-5-20251001-v1:0 | AWS Bedrock | LLM  | --                          |
-| Ultravox-ealtime                            | Ultravox    | LALM | --                          |
+| Ultravox-realtime                           | Ultravox    | LALM | --                          |
 | ink-whisper                                 | Cartesia    | STT  | --                          |
 | sonic-3                                     | Cartesia    | TTS  | --                          |
 | nova-3                                      | Deepgram    | STT  | --                          |
@@ -73,14 +70,26 @@ The table below lists all the other API-hosted models.
 
 ### Turn Detection Configurations
 
-We use the default turn detection configurations for each framework in our experiments. Each framework offers varying levels of configurability, making it difficult to standardize exact parameters and turn strategies across evaluations.
+We use the default turn detection configurations for most framework in our experiments. Each framework offers varying levels of configurability, making it difficult to standardize exact parameters and turn strategies across evaluations.
 
 - **Pipecat.** The default start strategy uses VAD (voice activity detection) or transcription receipt to determine when the user begins speaking, and the stop strategy uses AI-powered turn detection via `LocalSmartTurnAnalyzerV3` to determine when the user finishes speaking.
 - **OpenAI Realtime.** We use the default server VAD, which uses periods of silence to detect turn boundaries. Default values are used for `threshold`, `prefix_padding_ms`, and `silence_duration`.
-- **ElevenAgents.** The turn "eagerness" parameter is left at its default setting (`normal`).
+- **ElevenAgents.** The turn "eagerness" parameter was set to `eager`.
 - **Gemini Live.** We use the default automatic VAD provided.
 
 EVA-Bench makes turn detection parameters and options configurable via the CLI, so practitioners can run experiments using the turn detection settings available to their chosen framework. The only exception is ElevenAgents, where users must register and configure their agents separately prior to evaluation.
+
+## Judge Models
+
+The table below lists the API-hosted models used as a judge.
+
+| Model ID                                    | Provider    | Type | Parameters                  |
+|---------------------------------------------|-------------|------|-----------------------------|
+| gpt-5.2                                     | OpenAI      | LLM  | reasoning: default          |
+| gemini-3-flash-preview                      | Google      | LLM  | reasoning: default          |
+| us.anthropic.claude-opus-4-6-v1             | AWS Bedrock | LLM  | reasoning: default          |
+
+
 
 ## ElevenLabs User Simulator
 
@@ -107,12 +116,12 @@ We created four ElevenLabs agents for the user simulator, covering two accents (
 
 Below are the voice names used for the user simulator with ElevenAgents, for English language:
 
-| Accent  | Gender | Voice Name                            |
-|---------|--------|---------------------------------------|
-| English | Female | Natalee Champlin                      |
-| English | Male   | Eric - Smooth, Trustworthy            |
-| French  | Female | Mariva Viva Muse - Warm and Energetic |
-| French  | Male   | Jamie - French Accent \& Charismatic  |
+| Accent  | Gender | Voice Name                            | Voice ID |
+|---------|--------|---------------------------------------|---|
+| English | Female | Natalee Champlin                      | KpTQ5yzwazQWLkvnK59A |
+| English | Male   | Eric - Smooth, Trustworthy            | cjVigY5qzO86Huf0OWal |
+| French  | Female | Mariva Viva Muse - Warm and Energetic | 1hIScOW98xkqE5ttC10C |
+| French  | Male   | Jamie - French Accent \& Charismatic  | K8nDX2f6wjv6bCh5UeZi |
 
 The simulator is prompted with a specific user goal and is instructed to stay on task, communicate all required named entities clearly, and terminate when the goal is accomplished or the task is clearly unlikely to succeed.
 
