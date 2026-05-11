@@ -4,7 +4,7 @@ import { Github, ExternalLink, Database, Plane, Wrench, Stethoscope } from 'luci
 const DOMAINS = [
   {
     id: 'airline',
-    label: 'Airline (CSM)',
+    label: 'Airline',
     icon: Plane,
     blurb: 'Passengers calling to rebook disrupted flights — IRROPS rebooking, voluntary changes, cancellations, and vouchers.',
     tools: 15,
