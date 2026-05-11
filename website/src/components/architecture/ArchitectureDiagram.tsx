@@ -96,6 +96,9 @@ export function ArchitectureDiagram() {
               <div className="text-sm text-text-muted border-l-2 border-blue/30 pl-3 py-1">
                 <span className="text-blue-light font-medium">Human-like voice</span> — Conversational TTS
               </div>
+              <div className="text-sm text-text-muted border-l-2 border-blue/30 pl-3 py-1">
+                <span className="text-blue-light font-medium">Perturbation Suite</span> — Accent, background noise &amp; behavioral overlays applied to outbound user audio
+              </div>
             </div>
           </div>
 
@@ -148,6 +151,9 @@ export function ArchitectureDiagram() {
               </div>
               <div className="text-sm text-text-muted border-l-2 border-blue/30 pl-3 py-1">
                 <span className="text-blue-light font-medium">Human-like voice</span> — Conversational TTS
+              </div>
+              <div className="text-sm text-text-muted border-l-2 border-blue/30 pl-3 py-1">
+                <span className="text-blue-light font-medium">Perturbation Suite</span> — Accent, background noise &amp; behavioral overlays
               </div>
             </div>
           </div>
