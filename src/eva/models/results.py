@@ -6,7 +6,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field, model_validator
 
-from eva.models.versioning import _CURRENT_METRIC_VERSION, _CURRENT_PROMPT_HASH
+from eva.metrics.versioning import _CURRENT_METRIC_VERSION, _CURRENT_PROMPT_HASH
 
 
 class ErrorDetails(BaseModel):
