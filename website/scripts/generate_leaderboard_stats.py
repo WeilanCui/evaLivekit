@@ -46,7 +46,7 @@ SYSTEM_META = {
     "Ultravox":                                {"type": "2-part",  "stt": "-",                "llm": "Ultravox-Realtime", "tts": "-"},
     "GPT Realtime 1.5":                        {"type": "s2s",     "stt": "-",                "llm": "gpt-realtime-1.5",  "tts": "-"},
     "GPT Realtime Mini":                       {"type": "s2s",     "stt": "-",                "llm": "gpt-realtime-mini", "tts": "-"},
-    "ElevenAgent":                             {"type": "cascade", "stt": "Scribe v2.2 Realtime", "llm": "Gemini 3 Flash", "tts": "TTS Conversational v3"},
+    "ElevenAgent":                             {"type": "cascade", "stt": "Scribe v2.2 Realtime", "llm": "Gemini 3 Flash", "tts": "TTS Conversational v3", "display_name": "Scribe v2.2 Realtime + Gemini 3 Flash + TTS Conversational v3 (ElevenAgents)"},
     "Gemini 3.1 Flash Live":                   {"type": "s2s",     "stt": "-",                "llm": "Gemini 3.1 Flash Live", "tts": "-"},
     "Gemini 3 Flash + Gemini 3.1 Flash TTS":   {"type": "2-part",  "stt": "-",                "llm": "Gemini 3 Flash", "tts": "Gemini 3.1 Flash TTS"},
     "Cohere + Gemma-4-26B + Voxtral":          {"type": "cascade", "stt": "Cohere Transcribe", "llm": "Gemma-4-26B", "tts": "Voxtral 4B TTS"},
@@ -136,7 +136,7 @@ def main():
             raise SystemExit(f"Missing SYSTEM_META for {name!r}. Add it to generate_leaderboard_stats.py and re-run.")
         systems.append({
             "id": slugify(name),
-            "name": name,
+            "name": meta.get("display_name", name),
             "type": meta["type"],
             "stt": meta["stt"], "llm": meta["llm"], "tts": meta["tts"],
             "clean": extract_clean(payload.get("clean", {})),

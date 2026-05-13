@@ -1409,7 +1409,7 @@
     },
     {
       "id": "elevenagent",
-      "name": "ElevenAgent",
+      "name": "Scribe v2.2 Realtime + Gemini 3 Flash + TTS Conversational v3 (ElevenAgents)",
       "type": "cascade",
       "stt": "Scribe v2.2 Realtime",
       "llm": "Gemini 3 Flash",
