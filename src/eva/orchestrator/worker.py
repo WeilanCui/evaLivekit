@@ -203,17 +203,6 @@ class ConversationWorker:
             initial_db_path = self.output_dir / "initial_scenario_db.json"
             final_db_path = self.output_dir / "final_scenario_db.json"
 
-            if not initial_db_path.exists():
-                raise FileNotFoundError(
-                    f"Initial scenario database not found at {initial_db_path}. "
-                    "This is required for deterministic task completion metrics."
-                )
-            if not final_db_path.exists():
-                raise FileNotFoundError(
-                    f"Final scenario database not found at {final_db_path}. "
-                    "This is required for deterministic task completion metrics."
-                )
-
             with open(initial_db_path) as f:
                 initial_db = json.load(f)
             with open(final_db_path) as f:
