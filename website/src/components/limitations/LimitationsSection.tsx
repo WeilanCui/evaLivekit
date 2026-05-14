@@ -68,7 +68,7 @@ const futurePlans = [
     items: [
       {
         title: 'Expand to Multilingual',
-        description: 'Extend the existing CSM, ITSM, and HR domains beyond English by translating scenarios into additional languages and pairing them with multilingual user-simulator voices.',
+        description: 'Extend the existing CSM, ITSM, and HR domains beyond English by translating scenarios into additional languages with localized entities and pairing them with multilingual user-simulator voices.',
       },
     ],
   },
