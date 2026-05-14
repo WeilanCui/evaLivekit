@@ -86,7 +86,7 @@ export function LeaderboardSection() {
     <Section
       id="leaderboard"
       title="Results"
-      subtitle="Results across three domains (CSM, ITSM, HR). Pooled by default; toggle to inspect a single domain. CIs shown on all aggregates."
+      subtitle="Results across three domains (CSM, ITSM, HR). Pooled by default; toggle to inspect a single domain."
     >
       <div className="space-y-8">
         {/* Domain Toggle */}
