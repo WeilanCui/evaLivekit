@@ -226,7 +226,7 @@
         "completed_date": null,
         "status": "not_completed"
       },
-      "first_name": "Nia",
+      "first_name": "<FIRST_NAME>",
       "floor_code": "FL2",
       "group_memberships": [
         {
@@ -257,7 +257,7 @@
       "hire_date": "2021-05-17",
       "is_manager": false,
       "last_desk_assignment_date": null,
-      "last_name": "Williams",
+      "last_name": "<LAST_NAME>",
       "last_parking_assignment_date": null,
       "manager_auth_code": null,
       "manager_employee_id": "EMP062100",

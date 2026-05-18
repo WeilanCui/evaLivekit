@@ -353,7 +353,7 @@
         "status": "completed",
         "completed_date": "2026-07-22"
       },
-      "first_name": "Hugo",
+      "first_name": "<FIRST_NAME>",
       "floor_code": "FL2",
       "group_memberships": [
         {
@@ -384,7 +384,7 @@
       "hire_date": "2019-06-10",
       "is_manager": false,
       "last_desk_assignment_date": "2026-02-01",
-      "last_name": "Larsson",
+      "last_name": "<LAST_NAME>",
       "last_parking_assignment_date": null,
       "manager_auth_code": null,
       "manager_employee_id": "EMP044210",

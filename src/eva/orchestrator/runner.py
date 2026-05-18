@@ -17,6 +17,7 @@ from eva.orchestrator.port_pool import PortPool
 from eva.orchestrator.validation_runner import ValidationResult, ValidationRunner
 from eva.orchestrator.worker import ConversationWorker
 from eva.utils.conversation_checks import check_conversation_finished, find_records_with_llm_generic_error
+from eva.utils.culture import get_language_addendum
 from eva.utils.logging import get_logger
 from eva.utils.provenance import capture_provenance, resolve_tool_module_file
 
@@ -57,8 +58,12 @@ class BenchmarkRunner:
         self._failed_record_ids: list[str] = []
 
     def _load_agent_config(self) -> AgentConfig:
-        """Load single agent configuration."""
-        return AgentConfig.from_yaml(self.config.agent_config_path)
+        """Load single agent configuration; append the language addendum once."""
+        agent = AgentConfig.from_yaml(self.config.agent_config_path)
+        addendum = get_language_addendum(self.config.language)
+        if addendum:
+            agent.instructions = f"{agent.instructions}\n\n{addendum}"
+        return agent
 
     def _filter_records(self, records: list[EvaluationRecord]) -> list[EvaluationRecord]:
         """Filter records based on debug mode or record_ids.

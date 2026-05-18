@@ -162,6 +162,48 @@ streamlit run apps/config_editor.py
 
 The editor covers all variables grouped by tab (API keys, voice pipeline, model deployments, runtime settings, perturbations, etc.), with proper widgets for each type. See [`apps/README.md`](apps/README.md) for details.
 
+### Adding a Language
+
+To run EVA in a language other than English, follow these steps:
+
+**1. Register the language code** — add a new entry to the `LanguageType` enum in [`src/eva/models/config.py`](src/eva/models/config.py):
+
+```python
+class LanguageType(StrEnum):
+    english = "en"
+    french  = "fr"   # already present
+    spanish = "es"   # already present
+    # add yours here, e.g.:
+    italian = "it"
+```
+
+**2. Add ElevenLabs agent IDs to `.env.example`** (and your `.env`) — add a conditional block for the new language code so the config editor exposes the fields:
+
+```bash
+#x EVA_LANGUAGE=it
+#v EVA_IT_USER_F=your_elevenlabs_agent_id_female
+#x EVA_LANGUAGE=it
+#v EVA_IT_USER_M=your_elevenlabs_agent_id_male
+```
+
+**3. Run `add_culture_data.py`** — this generates culturally appropriate names and translated utterances for every record in every domain dataset, writes a "respond in X" addendum to `configs/agents/language_addenda.yaml`, and translates the assistant's opening greeting into `configs/agents/initial_messages.yaml`:
+
+```bash
+PYTHONPATH=src python scripts/add_culture_data.py \
+    --language it \
+    --language-name Italian \
+    --native-name italiano \
+    --auto-generate-names
+```
+
+Re-running is safe — existing entries are skipped (idempotent). Use `--dry-run` to preview changes before writing.
+
+**4. Set `EVA_LANGUAGE` and run**:
+
+```bash
+EVA_LANGUAGE=it EVA_DOMAIN=airline python main.py
+```
+
 ### Exploring Results
 
 EVA includes a Streamlit analysis app for visualizing and comparing results:

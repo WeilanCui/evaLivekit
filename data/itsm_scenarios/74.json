@@ -376,7 +376,7 @@
       "hire_date": "2019-06-10",
       "is_manager": false,
       "last_desk_assignment_date": "2026-03-01",
-      "last_name": "De Luca",
+      "last_name": "De <LAST_NAME>",
       "last_parking_assignment_date": null,
       "manager_auth_code": null,
       "manager_employee_id": "EMP070001",

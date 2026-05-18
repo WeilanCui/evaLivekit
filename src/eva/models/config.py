@@ -14,6 +14,7 @@ and explicit kwargs.  Scripts opt in to ``.env`` and/or CLI via
 
 import copy
 import logging
+import os
 from collections.abc import Iterator
 from datetime import UTC, datetime
 from enum import StrEnum
@@ -292,6 +293,18 @@ class BehaviorType(StrEnum):
     forgetful_disorganized = "forgetful_disorganized"
 
 
+class LanguageType(StrEnum):
+    """Language for the user simulator — selects a different ElevenLabs agent ID per language."""
+
+    english = "en"
+    spanish = "es"
+    french = "fr"
+    german = "de"
+    portuguese = "pt"
+    japanese = "ja"
+    mandarin = "zh"
+
+
 class PerturbationConfig(BaseModel):
     """Perturbations applied to the simulated user during a benchmark run.
 
@@ -466,6 +479,16 @@ class RunConfig(BaseSettings):
         ),
     )
 
+    # User simulator language — picks per-language ElevenLabs agent IDs
+    language: LanguageType = Field(
+        LanguageType.english,
+        description=(
+            "Language for the user simulator. When set to a non-English value, "
+            "the matching EVA_{LANGUAGE}_USER_F and EVA_{LANGUAGE}_USER_M agent IDs must also be set. "
+            "Mutually exclusive with accent and behavior perturbations."
+        ),
+    )
+
     # Debug and filtering
     debug: bool = Field(
         False,
@@ -578,7 +601,8 @@ class RunConfig(BaseSettings):
         # self.model.pipeline_parts is only available if self.model is valid, which the above asserts.
         if "run_id" not in self.model_fields_set:
             suffix = "_".join(v for v in self.model.pipeline_parts.values() if v)
-            self.run_id = f"{datetime.now(UTC):%Y-%m-%d_%H-%M-%S.%f}_{suffix}"
+            lang = self.language.value if self.language != LanguageType.english else "en"
+            self.run_id = f"{datetime.now(UTC):%Y-%m-%d_%H-%M-%S.%f}_{lang}_{suffix}"
 
         return self
 
@@ -602,6 +626,37 @@ class RunConfig(BaseSettings):
             )
             loc = ("model", f"{service.lower()}_params")
             yield InitErrorDetails(type=PydanticCustomError("missing_service_params", message), loc=loc, input=params)
+
+    @model_validator(mode="after")
+    def _check_language_personas(self) -> "RunConfig":
+        """When a non-English language is set, validate matching agent IDs and mutual exclusivity."""
+        if self.language == LanguageType.english:
+            return self
+
+        key = self.language.value.upper()
+        missing = [
+            f"EVA_{key}_USER_{gender}" for gender in ("F", "M") if not os.environ.get(f"EVA_{key}_USER_{gender}")
+        ]
+        if missing:
+            raise ValueError(
+                f"EVA_LANGUAGE is set to {self.language.value!r}, but the following required env vars are missing: "
+                f"{', '.join(missing)}"
+            )
+
+        if self.perturbation is not None and (
+            self.perturbation.accent is not None or self.perturbation.behavior is not None
+        ):
+            conflicts = [
+                f"EVA_PERTURBATION__{k.upper()}={v}"
+                for k, v in (("accent", self.perturbation.accent), ("behavior", self.perturbation.behavior))
+                if v is not None
+            ]
+            raise ValueError(
+                f"EVA_LANGUAGE ({self.language.value!r}) cannot be combined with accent/behavior perturbations "
+                f"({', '.join(conflicts)}) — they each require exclusive use of the ElevenLabs agent ID."
+            )
+
+        return self
 
     @model_validator(mode="before")
     @classmethod

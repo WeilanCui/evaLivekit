@@ -49,6 +49,7 @@ from eva.models.agents import AgentConfig
 from eva.models.record import EvaluationRecord
 from eva.models.results import ConversationResult, MetricScore, RecordMetrics
 from eva.utils import router
+from eva.utils.culture import resolve_scenario_db, resolve_user_goal
 from eva.utils.hash_utils import get_dict_hash
 from eva.utils.log_processing import (
     extract_tool_params_and_responses,
@@ -173,7 +174,13 @@ def resolve_paths(domain: str) -> tuple[Path, Path, Path]:
 def build_user_sim_prompt(record: EvaluationRecord) -> str:
     """Build the user-simulator system prompt from the record's goal and persona."""
     pm = PromptManager()
-    goal = record.user_goal
+    goal = resolve_user_goal(
+        record.user_goal,
+        record.culture_overrides,
+        os.getenv("EVA_LANGUAGE", "en"),
+        record.romanized_culture_overrides,
+        record.starting_utterances,
+    )
     domain = os.getenv("EVA_DOMAIN")
     return pm.get_prompt(
         f"user_simulator.system_prompt_{domain}",
@@ -480,7 +487,14 @@ async def run_record(
     record_output_dir.mkdir(parents=True, exist_ok=True)
 
     # ---- Init components ----
-    scenario_db_path = str(scenario_db_dir / f"{record.id}.json")
+    language = os.getenv("EVA_LANGUAGE", "en")
+    raw_scenario_db_path = scenario_db_dir / f"{record.id}.json"
+    with open(raw_scenario_db_path) as f:
+        raw_db = json.load(f)
+    resolved_db = resolve_scenario_db(raw_db, record.culture_overrides, language, record.romanized_culture_overrides)
+    scenario_db_path = str(record_output_dir / "scenario_db.json")
+    with open(scenario_db_path, "w", encoding="utf-8") as f:
+        json.dump(resolved_db, f, ensure_ascii=False, indent=2)
 
     tool_executor = ToolExecutor(
         tool_config_path=str(agent_config_path),
@@ -510,7 +524,13 @@ async def run_record(
     logger.info(f"Text-only test: record {record.id} | model={llm_model} | max_turns={max_turns}")
     logger.info(f"Metrics: {', '.join(requested_metrics)}")
 
-    user_message = record.user_goal["starting_utterance"]
+    user_message = resolve_user_goal(
+        record.user_goal,
+        record.culture_overrides,
+        os.getenv("EVA_LANGUAGE", "en"),
+        record.romanized_culture_overrides,
+        record.starting_utterances,
+    )["starting_utterance"]
     end_reason = "max_turns"
     turn_count = 0
     started_at = datetime.now(UTC)
@@ -596,9 +616,20 @@ async def run_record(
 
     metric_context = MetricContext(
         record_id=record.id,
-        user_goal=record.user_goal,
+        user_goal=resolve_user_goal(
+            record.user_goal,
+            record.culture_overrides,
+            language,
+            record.romanized_culture_overrides,
+            record.starting_utterances,
+        ),
         user_persona=record.user_config.get("user_persona", ""),
-        expected_scenario_db=record.ground_truth.expected_scenario_db,
+        expected_scenario_db=resolve_scenario_db(
+            record.ground_truth.expected_scenario_db,
+            record.culture_overrides,
+            language,
+            record.romanized_culture_overrides,
+        ),
         initial_scenario_db=initial_db,
         final_scenario_db=final_db,
         initial_scenario_db_hash=initial_hash,

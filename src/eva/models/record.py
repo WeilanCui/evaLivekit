@@ -117,6 +117,19 @@ class EvaluationRecord(BaseModel):
 
     scenario_context: dict = Field(..., description="Scenario context for the record")
 
+    culture_overrides: dict[str, dict[str, str]] = Field(
+        default_factory=dict,
+        description="Per-language name pairs (first_name/last_name) substituted into <FIRST_NAME>/<LAST_NAME>",
+    )
+    romanized_culture_overrides: dict[str, dict[str, str]] = Field(
+        default_factory=dict,
+        description="Per-language ASCII-romanized name pairs for <FIRST_NAME_ROMANIZED>/<LAST_NAME_ROMANIZED> (used in emails)",
+    )
+    starting_utterances: dict[str, str] = Field(
+        default_factory=dict,
+        description="Per-language opening utterance the user simulator says first; the active one is injected into user_goal at runtime",
+    )
+
     ground_truth: GroundTruth = Field(default_factory=GroundTruth, description="Expected outcomes for evaluation")
 
     agent_override: AgentOverride | None = Field(None, description="Override agent configuration for this record")

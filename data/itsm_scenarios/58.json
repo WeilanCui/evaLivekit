@@ -374,7 +374,7 @@
         "completed_date": "2026-05-28",
         "status": "completed"
       },
-      "first_name": "Selma",
+      "first_name": "<FIRST_NAME>",
       "floor_code": "FL2",
       "group_memberships": [
         {
@@ -405,7 +405,7 @@
       "hire_date": "2020-03-16",
       "is_manager": false,
       "last_desk_assignment_date": null,
-      "last_name": "Eriksson",
+      "last_name": "<LAST_NAME>",
       "last_parking_assignment_date": null,
       "manager_auth_code": null,
       "manager_employee_id": "EMP021100",

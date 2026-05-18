@@ -345,7 +345,7 @@
         "status": "completed",
         "completed_date": "2026-09-22"
       },
-      "first_name": "Ananya",
+      "first_name": "<FIRST_NAME>",
       "floor_code": "FL3",
       "group_memberships": [
         {
@@ -376,7 +376,7 @@
       "hire_date": "2020-06-15",
       "is_manager": false,
       "last_desk_assignment_date": "2026-05-10",
-      "last_name": "Sharma",
+      "last_name": "<LAST_NAME>",
       "last_parking_assignment_date": null,
       "manager_auth_code": null,
       "manager_employee_id": "EMP041200",

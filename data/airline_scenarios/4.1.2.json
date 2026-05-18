@@ -30,9 +30,9 @@
       "passengers": [
         {
           "elite_status": null,
-          "email": "jordan.hill@example.com",
+          "email": "jordan.<LAST_NAME_ROMANIZED>@example.com",
           "first_name": "Jordan",
-          "last_name": "Hill",
+          "last_name": "<LAST_NAME>",
           "meal_preference": "none",
           "passenger_id": "PAX001",
           "phone": "+1-206-555-0142",

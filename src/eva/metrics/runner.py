@@ -3,6 +3,7 @@
 import asyncio
 import inspect
 import json
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -20,6 +21,7 @@ from eva.metrics.versioning import _CURRENT_METRIC_VERSION
 from eva.models.config import PipelineType, get_pipeline_type
 from eva.models.record import EvaluationRecord
 from eva.models.results import ConversationResult, MetricScore, PassAtKResult, RecordMetrics
+from eva.utils.culture import resolve_scenario_db, resolve_user_config, resolve_user_goal
 from eva.utils.hash_utils import get_dict_hash
 from eva.utils.logging import get_logger
 from eva.utils.pass_at_k import (
@@ -552,7 +554,18 @@ class MetricsRunner:
         if record.agent_override and record.agent_override.instructions:
             agent_instructions = record.agent_override.instructions
 
-        user_persona = record.user_config["user_persona"]
+        language = os.getenv("EVA_LANGUAGE", "en")
+        resolved_user_goal = resolve_user_goal(
+            record.user_goal,
+            record.culture_overrides,
+            language,
+            record.romanized_culture_overrides,
+            record.starting_utterances,
+        )
+        resolved_user_config = resolve_user_config(
+            record.user_config, record.culture_overrides, language, record.romanized_culture_overrides
+        )
+        user_persona = resolved_user_config["user_persona"]
 
         initial_scenario_db = json.loads(initial_db_text)
         final_scenario_db = json.loads(final_db_text)
@@ -583,10 +596,15 @@ class MetricsRunner:
         metric_context = MetricContext(
             **postprocessor_fields,
             # Ground truth (only in dataset, not in postprocessor)
-            user_goal=record.user_goal,
+            user_goal=resolved_user_goal,
             user_persona=user_persona,
             # Scenario database state (loaded from files above)
-            expected_scenario_db=gt.expected_scenario_db,
+            expected_scenario_db=resolve_scenario_db(
+                gt.expected_scenario_db,
+                record.culture_overrides,
+                language,
+                record.romanized_culture_overrides,
+            ),
             initial_scenario_db=initial_scenario_db,
             final_scenario_db=final_scenario_db,
             initial_scenario_db_hash=initial_scenario_db_hash,

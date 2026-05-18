@@ -313,7 +313,7 @@
         "completed_date": "2025-11-08",
         "status": "completed"
       },
-      "first_name": "Priya",
+      "first_name": "<FIRST_NAME>",
       "floor_code": "FL2",
       "group_memberships": [
         {
@@ -344,7 +344,7 @@
       "hire_date": "2018-06-11",
       "is_manager": true,
       "last_desk_assignment_date": "2026-03-15",
-      "last_name": "Ramaswamy",
+      "last_name": "<LAST_NAME>",
       "last_parking_assignment_date": "2026-01-10",
       "manager_auth_code": "K4M2P9",
       "manager_employee_id": "EMP000901",

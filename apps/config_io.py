@@ -385,7 +385,8 @@ def compute_disabled(parsed: ParsedEnvExample, **state_values: str) -> set[str]:
     disabled: set[str] = set()
     for var in parsed.vars:
         for cond_key, cond_val in var.conditions:
-            if state_values.get(cond_key, "") != cond_val:
+            allowed = {v.strip() for v in cond_val.split(",") if v.strip()}
+            if state_values.get(cond_key, "") not in allowed:
                 disabled.add(var.name)
                 break
     return disabled

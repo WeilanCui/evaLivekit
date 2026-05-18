@@ -374,7 +374,7 @@
         "completed_date": null,
         "status": "not_completed"
       },
-      "first_name": "Benjamin",
+      "first_name": "<FIRST_NAME>",
       "floor_code": "FL3",
       "group_memberships": [
         {
@@ -405,7 +405,7 @@
       "hire_date": "2019-06-10",
       "is_manager": false,
       "last_desk_assignment_date": "2025-11-03",
-      "last_name": "Torres",
+      "last_name": "<LAST_NAME>",
       "last_parking_assignment_date": null,
       "manager_auth_code": null,
       "manager_employee_id": "EMP041200",

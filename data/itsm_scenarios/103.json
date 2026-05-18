@@ -282,7 +282,7 @@
         "completed_date": "2025-11-03",
         "status": "completed"
       },
-      "first_name": "Evelyn",
+      "first_name": "<FIRST_NAME>",
       "floor_code": "FL2",
       "group_memberships": [
         {
@@ -313,7 +313,7 @@
       "hire_date": "2019-06-10",
       "is_manager": true,
       "last_desk_assignment_date": "2026-03-01",
-      "last_name": "Hayes",
+      "last_name": "<LAST_NAME>",
       "last_parking_assignment_date": "2026-01-15",
       "manager_auth_code": "V7H8N3",
       "manager_employee_id": "EMP066600",

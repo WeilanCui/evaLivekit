@@ -357,7 +357,7 @@
         "completed_date": null,
         "status": "not_completed"
       },
-      "first_name": "Ingrid",
+      "first_name": "<FIRST_NAME>",
       "floor_code": "FL3",
       "group_memberships": [
         {
@@ -388,7 +388,7 @@
       "hire_date": "2021-03-15",
       "is_manager": false,
       "last_desk_assignment_date": "2026-02-10",
-      "last_name": "Nilsen",
+      "last_name": "<LAST_NAME>",
       "last_parking_assignment_date": null,
       "manager_auth_code": null,
       "manager_employee_id": "EMP031144",

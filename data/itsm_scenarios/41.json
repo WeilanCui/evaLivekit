@@ -190,7 +190,7 @@
       "hire_date": "2017-03-13",
       "is_manager": true,
       "last_desk_assignment_date": "2025-01-15",
-      "last_name": "Sj\u00f6berg",
+      "last_name": "Sjöberg",
       "last_parking_assignment_date": "2025-01-15",
       "manager_auth_code": "A7K9Q2",
       "manager_employee_id": "EMP070099",
@@ -345,7 +345,7 @@
         "status": "not_completed",
         "completed_date": null
       },
-      "first_name": "Clara",
+      "first_name": "<FIRST_NAME>",
       "floor_code": "FL2",
       "group_memberships": [
         {
@@ -376,7 +376,7 @@
       "hire_date": "2020-06-08",
       "is_manager": false,
       "last_desk_assignment_date": "2025-09-10",
-      "last_name": "Bergstr\u00f6m",
+      "last_name": "<LAST_NAME>",
       "last_parking_assignment_date": null,
       "manager_auth_code": null,
       "manager_employee_id": "EMP070001",

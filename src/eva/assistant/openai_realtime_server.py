@@ -26,7 +26,7 @@ from eva.assistant.audio_bridge import (
     pcm16_24k_to_mulaw_8k,
     sync_buffer_to_position,
 )
-from eva.assistant.base_server import INITIAL_MESSAGE, AbstractAssistantServer
+from eva.assistant.base_server import AbstractAssistantServer
 from eva.utils.logging import get_logger
 from eva.utils.prompt_manager import PromptManager
 
@@ -246,7 +246,7 @@ class OpenAIRealtimeAssistantServer(AbstractAssistantServer):
                         "content": [
                             {
                                 "type": "input_text",
-                                "text": f"Say: '{INITIAL_MESSAGE}'",
+                                "text": f"Say: '{self.initial_message}'",
                             }
                         ],
                     }

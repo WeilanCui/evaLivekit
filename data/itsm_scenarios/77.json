@@ -317,7 +317,7 @@
         "completed_date": "2026-03-18",
         "status": "completed"
       },
-      "first_name": "Yuki",
+      "first_name": "<FIRST_NAME>",
       "floor_code": "FL1",
       "group_memberships": [
         {
@@ -348,7 +348,7 @@
       "hire_date": "2019-04-15",
       "is_manager": false,
       "last_desk_assignment_date": "2026-01-10",
-      "last_name": "Mori",
+      "last_name": "<LAST_NAME>",
       "last_parking_assignment_date": null,
       "manager_auth_code": null,
       "manager_employee_id": "EMP041200",

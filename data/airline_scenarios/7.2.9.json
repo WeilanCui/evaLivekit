@@ -7,10 +7,10 @@
       "passengers": [
         {
           "passenger_id": "PAX001",
-          "first_name": "Stephanie",
-          "last_name": "Reeves",
+          "first_name": "<FIRST_NAME>",
+          "last_name": "<LAST_NAME>",
           "ticket_number": "1804567890123",
-          "email": "stephanie.reeves@gmail.com",
+          "email": "<FIRST_NAME_ROMANIZED>.<LAST_NAME_ROMANIZED>@gmail.com",
           "phone": "+1-469-555-1322",
           "elite_status": "silver",
           "meal_preference": "none",

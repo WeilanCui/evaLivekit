@@ -351,7 +351,7 @@
         "completed_date": null,
         "status": "not_completed"
       },
-      "first_name": "Ethan",
+      "first_name": "<FIRST_NAME>",
       "floor_code": "FL2",
       "group_memberships": [
         {
@@ -382,7 +382,7 @@
       "hire_date": "2020-06-15",
       "is_manager": false,
       "last_desk_assignment_date": null,
-      "last_name": "O'Brien",
+      "last_name": "<LAST_NAME>",
       "last_parking_assignment_date": null,
       "manager_auth_code": null,
       "manager_employee_id": "EMP041200",

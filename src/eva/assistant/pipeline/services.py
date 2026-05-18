@@ -40,7 +40,6 @@ from pipecat.services.openai.stt import OpenAISTTService
 from pipecat.services.openai.tts import OpenAITTSService
 from pipecat.services.stt_service import STTService
 from pipecat.services.tts_service import TTSService
-from pipecat.transcriptions.language import Language
 from pipecat.utils.text.base_text_filter import BaseTextFilter
 from websockets.asyncio.client import connect as websocket_connect
 
@@ -79,6 +78,15 @@ logger = get_logger(__name__)
 
 # Default sample rate for audio
 SAMPLE_RATE = 24000
+
+
+def _base_language(tag: str) -> str:
+    """Return the ISO 639-1 base code from a BCP 47 tag (e.g. 'es-MX' → 'es').
+
+    Used for providers that only accept the two-letter base code (e.g. Whisper/OpenAI STT).
+    """
+    return tag.split("-")[0].split("_")[0]
+
 
 # Round-robin counters for load-balanced URLs (one per service type)
 _tts_url_counter: int = 0
@@ -145,7 +153,7 @@ def create_stt_service(
             api_key=api_key,
             base_url=url,
             model=params["model"],
-            language=Language.EN,
+            language=_base_language(language_code),
             sample_rate=SAMPLE_RATE,
         )
 
@@ -203,11 +211,14 @@ def create_stt_service(
 
     elif model_lower == "openai":
         logger.info(f"Using OpenAI STT: {params['model']}")
+        # Whisper only accepts ISO 639-1 base codes (e.g. "es", not "es-MX")
+        # params["language"] takes precedence if explicitly set by the user
+        whisper_lang = params.get("language") or _base_language(language_code)
         stt_service = OpenAISTTService(
             api_key=api_key,
             base_url=url,
             model=params["model"],
-            language=Language.EN,
+            language=whisper_lang,
             sample_rate=SAMPLE_RATE,
         )
         if url and "azure" in url:
@@ -216,8 +227,6 @@ def create_stt_service(
                 api_key=api_key,
                 api_version=params.get("api_version", "2025-03-01-preview"),
             )
-        if params.get("language"):
-            stt_service._settings.language = params.get("language")
         return stt_service
 
     else:
@@ -468,6 +477,7 @@ def create_realtime_llm_service(
                 ),
                 audit_log=audit_log,
                 api_key=params["api_key"],
+                base_url=params.get("url", ""),
             )
 
         return OpenAIRealtimeLLMService(
@@ -547,7 +557,23 @@ def create_realtime_llm_service(
 
 
 def get_openai_session_properties(system_prompt: str, params: dict, pipecat_tools) -> SessionProperties:
-    """Create openai compatible session properties object."""
+    """Create openai compatible session properties object.
+
+    ``params["turn_detection_disabled"]`` (bool, default False): set True
+    when the realtime endpoint does NOT implement server-side VAD (e.g. our
+    vLLM-omni server). With turn_detection=False, pipecat falls back to its
+    own pipeline VAD (silero) and explicitly sends
+    ``input_audio_buffer.commit`` + ``response.create`` on
+    UserStoppedSpeakingFrame. Without this, pipecat assumes the server will
+    detect turn boundaries and never commits the audio buffer.
+    """
+    if params.get("turn_detection_disabled"):
+        # Pipecat will drive turn detection from its own VAD signals.
+        turn_detection: SemanticTurnDetection | bool = False
+    else:
+        # Set openai TurnDetection parameters. Not setting this at all will
+        # turn it on by default.
+        turn_detection = SemanticTurnDetection()
     return SessionProperties(
         instructions=system_prompt,
         audio=AudioConfiguration(
@@ -555,8 +581,7 @@ def get_openai_session_properties(system_prompt: str, params: dict, pipecat_tool
                 transcription=InputAudioTranscription(
                     model=params.get("transcription_model", "gpt-4o-mini-transcribe")
                 ),
-                # Set openai TurnDetection parameters. Not setting this at all will turn it on by default
-                turn_detection=SemanticTurnDetection(),
+                turn_detection=turn_detection,
             ),
             output=AudioOutput(
                 voice=params.get("voice", "marin"),

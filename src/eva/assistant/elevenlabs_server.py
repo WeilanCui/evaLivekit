@@ -41,7 +41,7 @@ from eva.assistant.audio_bridge import (
     parse_twilio_media_message,
     sync_buffer_to_position,
 )
-from eva.assistant.base_server import INITIAL_MESSAGE, AbstractAssistantServer
+from eva.assistant.base_server import AbstractAssistantServer
 from eva.assistant.elevenlabs_audio_interface import TwilioAudioBridge
 from eva.models.agents import AgentConfig
 from eva.models.config import ModelConfig
@@ -119,6 +119,7 @@ class ElevenLabsAssistantServer(AbstractAssistantServer):
         output_dir: Path,
         port: int,
         conversation_id: str,
+        language: str = "en",
     ):
         super().__init__(
             current_date_time=current_date_time,
@@ -129,6 +130,7 @@ class ElevenLabsAssistantServer(AbstractAssistantServer):
             output_dir=output_dir,
             port=port,
             conversation_id=conversation_id,
+            language=language,
         )
 
         # Recording sample rate (ElevenLabs operates at 16 kHz)
@@ -288,7 +290,7 @@ class ElevenLabsAssistantServer(AbstractAssistantServer):
         conv_config = ConversationInitiationData(
             dynamic_variables={
                 "system_prompt": self._system_prompt,
-                "initial_message": INITIAL_MESSAGE,
+                "initial_message": self.initial_message,
             },
         )
 

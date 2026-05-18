@@ -386,7 +386,7 @@
         "completed_date": null,
         "status": "not_completed"
       },
-      "first_name": "Amara",
+      "first_name": "<FIRST_NAME>",
       "floor_code": "FL2",
       "group_memberships": [
         {
@@ -417,7 +417,7 @@
       "hire_date": "2021-07-19",
       "is_manager": false,
       "last_desk_assignment_date": "2025-11-10",
-      "last_name": "Diallo",
+      "last_name": "<LAST_NAME>",
       "last_parking_assignment_date": null,
       "manager_auth_code": null,
       "manager_employee_id": "EMP062210",
@@ -739,7 +739,7 @@
     "network_connectivity": {
       "steps": [
         "Confirm whether other websites or apps are reachable.",
-        "Toggle Wi\u2011Fi or reconnect the network cable.",
+        "Toggle Wi‑Fi or reconnect the network cable.",
         "Reconnect the VPN if required.",
         "Restart the device and test again."
       ]

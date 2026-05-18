@@ -469,7 +469,7 @@
         "status": "completed",
         "completed_date": "2025-11-21"
       },
-      "first_name": "Ava",
+      "first_name": "<FIRST_NAME>",
       "floor_code": "FL3",
       "group_memberships": [
         {
@@ -500,7 +500,7 @@
       "hire_date": "2021-06-14",
       "is_manager": false,
       "last_desk_assignment_date": null,
-      "last_name": "Chen",
+      "last_name": "<LAST_NAME>",
       "last_parking_assignment_date": null,
       "manager_auth_code": null,
       "manager_employee_id": "EMP022201",

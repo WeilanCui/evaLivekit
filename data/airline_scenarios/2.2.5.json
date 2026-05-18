@@ -8,9 +8,9 @@
         {
           "passenger_id": "PAX001",
           "first_name": "Jordan",
-          "last_name": "Peterson",
+          "last_name": "<LAST_NAME>",
           "ticket_number": "0741234567890",
-          "email": "jordan.peterson@example.com",
+          "email": "jordan.<LAST_NAME_ROMANIZED>@example.com",
           "phone": "+1-305-555-0147",
           "elite_status": null,
           "meal_preference": "none",

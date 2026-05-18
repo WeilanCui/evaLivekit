@@ -133,12 +133,17 @@ def _init_state() -> None:
 
 
 def _is_visible_av(var: AnnotatedVar) -> bool:
-    """Return True when all #x conditions for this var are satisfied."""
+    """Return True when all #x conditions for this var are satisfied.
+
+    Comma-separated values in a single condition are treated as OR
+    (e.g. `#x pipeline_mode=LLM,AudioLLM`).
+    """
     for cond_key, cond_val in var.conditions:
         actual = st.session_state.get(cond_key)
         if actual is None:
             actual = st.session_state.get("field_values", {}).get(cond_key)
-        if actual != cond_val:
+        allowed = {v.strip() for v in cond_val.split(",") if v.strip()}
+        if actual not in allowed:
             return False
     return True
 
