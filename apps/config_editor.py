@@ -223,7 +223,7 @@ def _render_json_object(name: str, info: str, current: dict) -> None:
     edited = st.data_editor(
         rows,
         num_rows="dynamic",
-        width='stretch',
+        width="stretch",
         column_config={
             "key": st.column_config.TextColumn("key", required=False),
             "value": st.column_config.TextColumn("value", required=False),
@@ -291,7 +291,7 @@ def _render_deployment_list(name: str, info: str, current: list) -> None:
     edited_summary = st.data_editor(
         summary_rows,
         num_rows="dynamic",
-        width='stretch',
+        width="stretch",
         column_config={
             "model_name": st.column_config.TextColumn("model_name (alias)", required=False),
             "provider/model": st.column_config.TextColumn("provider/model (litellm_params.model)", required=False),
@@ -336,7 +336,7 @@ def _render_deployment_list(name: str, info: str, current: list) -> None:
     edited_lp = st.data_editor(
         lp_rows,
         num_rows="dynamic",
-        width='stretch',
+        width="stretch",
         column_config={
             "key": st.column_config.TextColumn("key", required=False),
             "value": st.column_config.TextColumn("value", required=False),
@@ -357,7 +357,7 @@ def _render_deployment_list(name: str, info: str, current: list) -> None:
         edited_extra = st.data_editor(
             extra_rows,
             num_rows="dynamic",
-            width='stretch',
+            width="stretch",
             column_config={
                 "key": st.column_config.TextColumn("key", required=False),
                 "value": st.column_config.TextColumn("value", required=False),
@@ -418,7 +418,7 @@ def _render_add_var_widget(context: str) -> None:
             placeholder="e.g. MY_API_KEY",
         )
     with col_btn:
-        if st.button("Add", key=f"_add_var_btn_{context}", width='stretch'):
+        if st.button("Add", key=f"_add_var_btn_{context}", width="stretch"):
             name = new_name.strip().upper()
             if not name:
                 st.warning("Please enter a variable name.")
@@ -621,7 +621,7 @@ def main() -> None:
             data=text,
             file_name=".env",
             mime="text/plain",
-            width='stretch',
+            width="stretch",
         )
         data_attr = html_module.escape(json.dumps(text), quote=True)
         st_components.html(
@@ -639,10 +639,10 @@ def main() -> None:
             """,
             height=42,
         )
-        if st.button("💾 Save to .env", width='stretch', type="primary"):
+        if st.button("💾 Save to .env", width="stretch", type="primary"):
             ENV_PATH.write_text(text)
             st.success(f"Wrote {ENV_PATH}")
-        if st.button("👁️ View preview", width='stretch'):
+        if st.button("👁️ View preview", width="stretch"):
             _show_preview(text)
 
 
