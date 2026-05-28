@@ -3,7 +3,7 @@
   "zeros": [
     "cero"
   ],
-  "ones": {
+  "cardinals": {
     "uno": 1,
     "dos": 2,
     "tres": 3,
@@ -19,37 +19,183 @@
     "trece": 13,
     "catorce": 14,
     "quince": 15,
-    "dieciseis": 16,
+    "dieciséis": 16,
     "diecisiete": 17,
     "dieciocho": 18,
     "diecinueve": 19,
     "veintiuno": 21,
-    "veintidos": 22,
-    "veintitres": 23,
+    "veintidós": 22,
+    "veintitrés": 23,
     "veinticuatro": 24,
     "veinticinco": 25,
-    "veintiseis": 26,
+    "veintiséis": 26,
     "veintisiete": 27,
     "veintiocho": 28,
     "veintinueve": 29,
-    "doscientos": 200,
-    "trescientos": 300,
-    "cuatrocientos": 400,
-    "quinientos": 500,
-    "seiscientos": 600,
-    "setecientos": 700,
-    "ochocientos": 800,
-    "novecientos": 900
+    "quinientos": 500
   },
-  "ones_extra": {
+  "cardinal_variants": {
     "un": 1,
     "una": 1,
-    "dieciséis": 16,
-    "veintidós": 22,
-    "veintitrés": 23,
-    "veintiséis": 26
+    "dieciseis": 16,
+    "veintidos": 22,
+    "veintitres": 23,
+    "veintiseis": 26
   },
-  "ones_suffixed": {},
+  "cardinals_suffixed": {
+    "primero": [
+      1,
+      "º"
+    ],
+    "primera": [
+      1,
+      "ª"
+    ],
+    "segundo": [
+      2,
+      "º"
+    ],
+    "segunda": [
+      2,
+      "ª"
+    ],
+    "tercero": [
+      3,
+      "º"
+    ],
+    "tercera": [
+      3,
+      "ª"
+    ],
+    "cuarto": [
+      4,
+      "º"
+    ],
+    "cuarta": [
+      4,
+      "ª"
+    ],
+    "quinto": [
+      5,
+      "º"
+    ],
+    "quinta": [
+      5,
+      "ª"
+    ],
+    "sexto": [
+      6,
+      "º"
+    ],
+    "sexta": [
+      6,
+      "ª"
+    ],
+    "séptimo": [
+      7,
+      "º"
+    ],
+    "séptima": [
+      7,
+      "ª"
+    ],
+    "octavo": [
+      8,
+      "º"
+    ],
+    "octava": [
+      8,
+      "ª"
+    ],
+    "noveno": [
+      9,
+      "º"
+    ],
+    "novena": [
+      9,
+      "ª"
+    ],
+    "décimo": [
+      10,
+      "º"
+    ],
+    "décima": [
+      10,
+      "ª"
+    ],
+    "undécimo": [
+      11,
+      "º"
+    ],
+    "undécima": [
+      11,
+      "ª"
+    ],
+    "duodécimo": [
+      12,
+      "º"
+    ],
+    "duodécima": [
+      12,
+      "ª"
+    ],
+    "decimotercero": [
+      13,
+      "º"
+    ],
+    "decimotercera": [
+      13,
+      "ª"
+    ],
+    "decimocuarto": [
+      14,
+      "º"
+    ],
+    "decimocuarta": [
+      14,
+      "ª"
+    ],
+    "decimoquinto": [
+      15,
+      "º"
+    ],
+    "decimoquinta": [
+      15,
+      "ª"
+    ],
+    "decimosexto": [
+      16,
+      "º"
+    ],
+    "decimosexta": [
+      16,
+      "ª"
+    ],
+    "decimoséptimo": [
+      17,
+      "º"
+    ],
+    "decimoséptima": [
+      17,
+      "ª"
+    ],
+    "decimoctavo": [
+      18,
+      "º"
+    ],
+    "decimoctava": [
+      18,
+      "ª"
+    ],
+    "decimonoveno": [
+      19,
+      "º"
+    ],
+    "decimonovena": [
+      19,
+      "ª"
+    ]
+  },
   "tens": {
     "veinte": 20,
     "treinta": 30,
@@ -60,19 +206,82 @@
     "ochenta": 80,
     "noventa": 90
   },
-  "tens_suffixed": {},
-  "multipliers": {
+  "tens_suffixed": {
+    "vigésimo": [
+      20,
+      "º"
+    ],
+    "vigésima": [
+      20,
+      "ª"
+    ],
+    "trigésimo": [
+      30,
+      "º"
+    ],
+    "trigésima": [
+      30,
+      "ª"
+    ],
+    "cuadragésimo": [
+      40,
+      "º"
+    ],
+    "cuadragésima": [
+      40,
+      "ª"
+    ],
+    "quincuagésimo": [
+      50,
+      "º"
+    ],
+    "quincuagésima": [
+      50,
+      "ª"
+    ],
+    "sexagésimo": [
+      60,
+      "º"
+    ],
+    "sexagésima": [
+      60,
+      "ª"
+    ],
+    "septuagésimo": [
+      70,
+      "º"
+    ],
+    "septuagésima": [
+      70,
+      "ª"
+    ],
+    "octogésimo": [
+      80,
+      "º"
+    ],
+    "octogésima": [
+      80,
+      "ª"
+    ],
+    "nonagésimo": [
+      90,
+      "º"
+    ],
+    "nonagésima": [
+      90,
+      "ª"
+    ]
+  },
+  "scaling_units": {
     "cien": 100,
     "ciento": 100,
     "mil": 1000,
-    "millon": 1000000,
     "millón": 1000000,
     "millones": 1000000,
-    "billon": 1000000000000,
     "billón": 1000000000000,
     "billones": 1000000000000
   },
-  "multipliers_suffixed": {},
+  "scaling_units_suffixed": {},
   "conjunction_word": "y",
   "decimal_word": "coma",
   "reversed_units": false,
@@ -80,12 +289,12 @@
   "vigesimal_trigger_words": [],
   "vigesimal_multiplier": 20,
   "vigesimal_residuals": [],
-  "high_ones_residuals": [
+  "additive_teen_residuals": [
     0
   ],
-  "ones_continuation_on_prev_ones": false,
+  "cardinal_continuation_on_prev_cardinal": false,
   "conjunction_ignore_prev": [
-    "multipliers",
+    "scaling_units",
     "tens"
   ],
   "repeat_words": {},
@@ -97,7 +306,7 @@
   "preceding_prefixers": {},
   "following_prefixers": {},
   "suffixers": {},
-  "ignore_patterns": "\\b(eh|em|mmm|aja|ehm|estee|este|bueno|pues)\\b",
+  "ignore_patterns": "\\b(eh|em|mmm|aja|este|esto|bueno|pues|digamos)\\b",
   "replacers": {
     "\\bsr\\b": "senor",
     "\\bsra\\b": "senora",
@@ -106,19 +315,17 @@
     "\\bdra\\b": "doctora",
     "\\bprof\\b": "profesor",
     "\\bprofa\\b": "profesora",
-    "\\bing\\b": "ingeniero",
     "\\blic\\b": "licenciado",
+    "\\bing\\b": "ingeniero",
     "\\barq\\b": "arquitecto",
-    "\\bcap\\b": "capitan",
-    "\\bgral\\b": "general",
-    "\\bfra\\b": "fray",
-    "\\bhno\\b": "hermano",
-    "\\bhna\\b": "hermana"
+    "\\bud\\b": "usted",
+    "\\buds\\b": "ustedes"
   },
   "strip_space_before_apostrophe": false,
   "ordinal_suffix_pattern": "",
   "spelling_map_path": null,
   "letter_class": "a-zà-öø-ÿœæ",
+  "preserve_combining_marks": false,
   "decimal_separator": "comma",
   "thousand_separators": [
     "dot",

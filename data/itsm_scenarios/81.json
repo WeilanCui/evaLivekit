@@ -492,7 +492,11 @@
           "हेडक्वार्टर",
           "मुख्यालय",
           "एचक्यू",
-          "एच क्यू"
+          "एच क्यू",
+          "centrala",
+          "siedziba główna",
+          "siedziba",
+          "la sede"
         ],
         "name_aliases_translatable": true,
         "name_aliases_base": [
@@ -602,7 +606,16 @@
           "हेडक्वार्टर गैरेज",
           "एचक्यू गैरेज",
           "मुख्यालय का गैरेज",
-          "एच क्यू गैरेज"
+          "एच क्यू गैरेज",
+          "garaż przy centrali",
+          "parking przy centrali",
+          "garaż hq",
+          "parking qg",
+          "garaje de central",
+          "zentrale-parkhaus",
+          "garage an der zentrale",
+          "मुख्यालय गैरेज",
+          "हेडक्वार्टर पार्किंग"
         ],
         "zone_code": "PZA",
         "name_aliases_translatable": true,

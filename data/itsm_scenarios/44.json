@@ -668,7 +668,12 @@
           "innenstadtgebäude",
           "downtown-gebäude",
           "डाउनटाउन",
-          "डाउनटाउन बिल्डिंग"
+          "डाउनटाउन बिल्डिंग",
+          "centrum",
+          "budynek w centrum",
+          "śródmieście",
+          "le site du centre-ville",
+          "शहर वाला ऑफिस"
         ],
         "name_aliases_translatable": true,
         "name_aliases_base": [
@@ -771,7 +776,13 @@
           "parken süd",
           "साउथ गैरेज",
           "दक्षिण वाला गैरेज",
-          "साउथ पार्किंग"
+          "साउथ पार्किंग",
+          "garaż południowy",
+          "parking południowy",
+          "le parking du sud",
+          "süd-parkhaus",
+          "दक्षिण गैरेज",
+          "दक्षिण पार्किंग"
         ],
         "name_aliases_translatable": true,
         "name_aliases_base": [

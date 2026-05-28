@@ -1,10 +1,10 @@
 {
   "code": "fr",
   "zeros": [
-    "zero",
-    "zéro"
+    "zéro",
+    "zero"
   ],
-  "ones": {
+  "cardinals": {
     "un": 1,
     "deux": 2,
     "trois": 3,
@@ -20,12 +20,15 @@
     "treize": 13,
     "quatorze": 14,
     "quinze": 15,
-    "seize": 16
+    "seize": 16,
+    "dix-sept": 17,
+    "dix-huit": 18,
+    "dix-neuf": 19
   },
-  "ones_extra": {
+  "cardinal_variants": {
     "une": 1
   },
-  "ones_suffixed": {
+  "cardinals_suffixed": {
     "premier": [
       1,
       "er"
@@ -36,11 +39,11 @@
     ],
     "second": [
       2,
-      "nd"
+      "e"
     ],
     "seconde": [
       2,
-      "nde"
+      "e"
     ],
     "deuxième": [
       2,
@@ -50,11 +53,11 @@
       3,
       "ème"
     ],
-    "quatreième": [
+    "quatrième": [
       4,
       "ème"
     ],
-    "cinqième": [
+    "cinquième": [
       5,
       "ème"
     ],
@@ -70,7 +73,7 @@
       8,
       "ème"
     ],
-    "neufième": [
+    "neuvième": [
       9,
       "ème"
     ],
@@ -78,40 +81,40 @@
       10,
       "ème"
     ],
-    "onzeième": [
+    "onzième": [
       11,
       "ème"
     ],
-    "douzeième": [
+    "douzième": [
       12,
       "ème"
     ],
-    "treizeième": [
+    "treizième": [
       13,
       "ème"
     ],
-    "quatorzeième": [
+    "quatorzième": [
       14,
       "ème"
     ],
-    "quinzeième": [
+    "quinzième": [
       15,
       "ème"
     ],
-    "seizeième": [
+    "seizième": [
       16,
       "ème"
     ],
-    "cinquième": [
-      5,
+    "dix-septième": [
+      17,
       "ème"
     ],
-    "neuvième": [
-      9,
+    "dix-huitième": [
+      18,
       "ème"
     ],
-    "unième": [
-      1,
+    "dix-neuvième": [
+      19,
       "ème"
     ]
   },
@@ -145,72 +148,26 @@
       "ème"
     ]
   },
-  "multipliers": {
+  "scaling_units": {
     "cent": 100,
     "cents": 100,
     "mille": 1000,
     "million": 1000000,
     "millions": 1000000,
     "milliard": 1000000000,
-    "milliards": 1000000000,
-    "billion": 1000000000000,
-    "billions": 1000000000000,
-    "trillion": 1000000000000000000,
-    "trillions": 1000000000000000000
+    "milliards": 1000000000
   },
-  "multipliers_suffixed": {
-    "centième": [
-      100,
-      "ème"
-    ],
-    "millième": [
-      1000,
-      "ème"
-    ],
-    "millionième": [
-      1000000,
-      "ème"
-    ],
-    "milliardième": [
-      1000000000,
-      "ème"
-    ]
-  },
-  "preceding_prefixers": {
-    "moins": "-",
-    "plus": "+"
-  },
-  "following_prefixers": {
-    "euro": "€",
-    "euros": "€",
-    "dollar": "$",
-    "dollars": "$",
-    "livre": "£",
-    "livres": "£",
-    "centime": "¢",
-    "centimes": "¢"
-  },
-  "suffixers": {
-    "pour": {
-      "cent": "%"
-    },
-    "pourcent": "%"
-  },
+  "scaling_units_suffixed": {},
   "conjunction_word": "et",
-  "conjunction_ignore_prev": [
-    "multipliers",
-    "tens"
-  ],
-  "repeat_words": {},
   "decimal_word": "virgule",
+  "reversed_units": false,
+  "split_hyphenated_numbers": true,
   "vigesimal_trigger_words": [
     "vingt",
     "vingts"
   ],
   "vigesimal_multiplier": 20,
   "vigesimal_residuals": [
-    2,
-    3,
     4,
     5,
     6,
@@ -218,42 +175,46 @@
     8,
     9
   ],
-  "high_ones_residuals": [
+  "additive_teen_residuals": [
     0,
     60,
     80
   ],
-  "ones_continuation_on_prev_ones": false,
-  "half_pattern": "\\bet\\s+demi(?:e)?\\b",
-  "half_replacement": "virgule cinq",
-  "split_hyphenated_numbers": true,
-  "letter_class": "a-zéèêëàâùûôîïç",
-  "ordinal_suffix_pattern": "er|ère|ème|nd|nde|e",
-  "one_word": "un",
+  "cardinal_continuation_on_prev_cardinal": false,
+  "conjunction_ignore_prev": [
+    "scaling_units",
+    "tens"
+  ],
+  "repeat_words": {},
+  "half_pattern": null,
+  "half_replacement": null,
+  "one_word": null,
   "one_plural_suffix": "",
-  "cents_connector": "et",
-  "ignore_patterns": "\\b(euh|heu|hum|hmm|mm|mhm|mmm|uh|um|ah|oh|bah|ben)\\b",
+  "cents_connector": null,
+  "preceding_prefixers": {},
+  "following_prefixers": {},
+  "suffixers": {},
+  "ignore_patterns": "\\b(euh|heu|hum|hmm|mh|mhm|hein|bah|ben|bof|pff|euhm)\\b",
   "replacers": {
-    "\\bm\\.\\b": "monsieur ",
-    "\\bmme\\b": "madame ",
-    "\\bmlle\\b": "mademoiselle ",
-    "\\bdr\\b": "docteur ",
-    "\\bprof\\b": "professeur ",
-    "\\bst\\b": "saint ",
-    "\\bste\\b": "sainte ",
-    "\\bqq\\b": "quelques ",
-    "\\btjrs\\b": "toujours ",
-    "\\bstp\\b": "s'il te plaît ",
-    "\\bsvp\\b": "s'il vous plaît ",
-    "\\bpq\\b": "pourquoi ",
-    "\\bbcp\\b": "beaucoup ",
-    "\\bpcq\\b": "parce que "
+    "\\bm\\b": "monsieur",
+    "\\bmme\\b": "madame",
+    "\\bmlle\\b": "mademoiselle",
+    "\\bdr\\b": "docteur",
+    "\\bpr\\b": "professeur",
+    "\\bprof\\b": "professeur",
+    "\\bme\\b": "maitre",
+    "\\bmgr\\b": "monseigneur",
+    "\\bsr\\b": "soeur",
+    "\\bfr\\b": "frere"
   },
   "strip_space_before_apostrophe": false,
+  "ordinal_suffix_pattern": "",
+  "spelling_map_path": null,
+  "letter_class": "a-zà-öø-ÿœæ",
+  "preserve_combining_marks": false,
+  "decimal_separator": "comma",
   "thousand_separators": [
     "dot",
     "space"
-  ],
-  "decimal_separator": "comma",
-  "spelling_map_path": null
+  ]
 }

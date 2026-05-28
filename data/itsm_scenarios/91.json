@@ -673,7 +673,12 @@
           "innenstadtgebäude",
           "downtown-gebäude",
           "डाउनटाउन",
-          "डाउनटाउन बिल्डिंग"
+          "डाउनटाउन बिल्डिंग",
+          "centrum",
+          "budynek w centrum",
+          "śródmieście",
+          "le site du centre-ville",
+          "शहर वाला ऑफिस"
         ],
         "name_aliases_translatable": true,
         "name_aliases_base": [
@@ -805,7 +810,15 @@
           "garage a in downtown",
           "डाउनटाउन गैरेज ए",
           "डाउनटाउन वाला गैरेज ए",
-          "डाउनटाउन गैरेज"
+          "डाउनटाउन गैरेज",
+          "garaż a w centrum",
+          "parking a w centrum",
+          "garaż w centrum",
+          "garaje del centro",
+          "a-parkhaus downtown",
+          "garaje del centro a",
+          "गैरेज ए",
+          "शहर वाला गैरेज"
         ],
         "zone_code": "PZA",
         "name_aliases_translatable": true,

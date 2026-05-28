@@ -377,7 +377,13 @@
           "el campus del este",
           "ईस्ट कैंपस",
           "पूर्व कैंपस",
-          "ईस्ट साइड कैंपस"
+          "ईस्ट साइड कैंपस",
+          "kampus wschodni",
+          "wschodni kampus",
+          "le campus à l’est",
+          "ostgelände",
+          "पूर्वी कैंपस",
+          "ईस्ट वाला कैंपस"
         ],
         "name_aliases_translatable": true,
         "name_aliases_base": [
@@ -450,7 +456,19 @@
           "ईस्ट कैंपस गैरेज",
           "ईस्ट गैरेज",
           "ईस्ट कैंपस पार्किंग",
-          "पूर्व कैंपस पार्किंग"
+          "पूर्व कैंपस पार्किंग",
+          "garaż kampusu wschodniego",
+          "parking kampusu wschodniego",
+          "garaż wschodni",
+          "garaż wschodniego kampusu",
+          "parking wschodni",
+          "garage est",
+          "garaje este",
+          "ostgarage am campus",
+          "garage ostcampus",
+          "parkhaus ost",
+          "garaje este del campus",
+          "पूर्वी कैंपस पार्किंग"
         ],
         "zone_code": "PZE",
         "name_aliases_translatable": true,

@@ -1,0 +1,103 @@
+{
+  "code": "pl",
+  "zeros": [
+    "zero",
+    "nul",
+    "nula"
+  ],
+  "cardinals": {
+    "jeden": 1,
+    "dwa": 2,
+    "trzy": 3,
+    "cztery": 4,
+    "pięć": 5,
+    "sześć": 6,
+    "siedem": 7,
+    "osiem": 8,
+    "dziewięć": 9,
+    "dziesięć": 10,
+    "jedenaście": 11,
+    "dwanaście": 12,
+    "trzynaście": 13,
+    "czternaście": 14,
+    "piętnaście": 15,
+    "szesnaście": 16,
+    "siedemnaście": 17,
+    "osiemnaście": 18,
+    "dziewiętnaście": 19,
+    "dwieście": 200,
+    "trzysta": 300,
+    "czterysta": 400,
+    "pięćset": 500,
+    "sześćset": 600,
+    "siedemset": 700,
+    "osiemset": 800,
+    "dziewięćset": 900
+  },
+  "cardinal_variants": {
+    "jedna": 1,
+    "jedno": 1,
+    "dwie": 2
+  },
+  "cardinals_suffixed": {},
+  "tens": {
+    "dwadzieścia": 20,
+    "trzydzieści": 30,
+    "czterdzieści": 40,
+    "pięćdziesiąt": 50,
+    "sześćdziesiąt": 60,
+    "siedemdziesiąt": 70,
+    "osiemdziesiąt": 80,
+    "dziewięćdziesiąt": 90
+  },
+  "tens_suffixed": {},
+  "scaling_units": {
+    "sto": 100,
+    "tysiąc": 1000,
+    "milion": 1000000,
+    "miliard": 1000000000
+  },
+  "scaling_units_suffixed": {},
+  "conjunction_word": null,
+  "decimal_word": "przecinek",
+  "reversed_units": false,
+  "split_hyphenated_numbers": false,
+  "vigesimal_trigger_words": [],
+  "vigesimal_multiplier": 20,
+  "vigesimal_residuals": [],
+  "additive_teen_residuals": [
+    0
+  ],
+  "cardinal_continuation_on_prev_cardinal": false,
+  "conjunction_ignore_prev": [],
+  "repeat_words": {},
+  "half_pattern": null,
+  "half_replacement": null,
+  "one_word": null,
+  "one_plural_suffix": "",
+  "cents_connector": null,
+  "preceding_prefixers": {},
+  "following_prefixers": {},
+  "suffixers": {},
+  "ignore_patterns": "\\b(yyy|eee|emm|ym|hm|mhm|aha|noo)\\b",
+  "replacers": {
+    "\\bdr\\b": "doktor",
+    "\\bprof\\b": "profesor",
+    "\\bmgr\\b": "magister",
+    "\\binz\\b": "inzynier",
+    "\\blek\\b": "lekarz",
+    "\\bp\\b": "pan",
+    "\\bpp\\b": "panstwo",
+    "\\bpani\\b": "pani",
+    "\\bks\\b": "ksiadz"
+  },
+  "strip_space_before_apostrophe": false,
+  "ordinal_suffix_pattern": "",
+  "spelling_map_path": null,
+  "letter_class": "a-zà-öø-ÿœæ",
+  "preserve_combining_marks": false,
+  "decimal_separator": "comma",
+  "thousand_separators": [
+    "space"
+  ]
+}

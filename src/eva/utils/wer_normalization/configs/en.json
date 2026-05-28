@@ -5,7 +5,7 @@
     "oh",
     "zero"
   ],
-  "ones": {
+  "cardinals": {
     "one": 1,
     "two": 2,
     "three": 3,
@@ -26,8 +26,8 @@
     "eighteen": 18,
     "nineteen": 19
   },
-  "ones_extra": {},
-  "ones_suffixed": {
+  "cardinal_variants": {},
+  "cardinals_suffixed": {
     "ones": [
       1,
       "s"
@@ -261,7 +261,7 @@
       "th"
     ]
   },
-  "multipliers": {
+  "scaling_units": {
     "hundred": 100,
     "thousand": 1000,
     "million": 1000000,
@@ -275,7 +275,7 @@
     "nonillion": 1000000000000000000000000000000,
     "decillion": 1000000000000000000000000000000000
   },
-  "multipliers_suffixed": {
+  "scaling_units_suffixed": {
     "hundreds": [
       100,
       "s"
@@ -397,7 +397,7 @@
   },
   "conjunction_word": "and",
   "conjunction_ignore_prev": [
-    "multipliers"
+    "scaling_units"
   ],
   "repeat_words": {
     "double": 2,
@@ -407,10 +407,10 @@
   "vigesimal_trigger_words": [],
   "vigesimal_multiplier": 20,
   "vigesimal_residuals": [],
-  "high_ones_residuals": [
+  "additive_teen_residuals": [
     0
   ],
-  "ones_continuation_on_prev_ones": true,
+  "cardinal_continuation_on_prev_cardinal": true,
   "half_pattern": "\\band\\s+a\\s+half\\b",
   "half_replacement": "point five",
   "split_hyphenated_numbers": false,

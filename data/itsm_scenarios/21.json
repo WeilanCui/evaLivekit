@@ -435,7 +435,16 @@
           "हेडक्वार्टर ईस्ट",
           "एचक्यू ईस्ट",
           "ईस्ट बिल्डिंग",
-          "एच क्यू ईस्ट"
+          "एच क्यू ईस्ट",
+          "wschodnia centrala",
+          "centrala wschód",
+          "wschodni budynek",
+          "hq wschód",
+          "site est du siège",
+          "bâtiment est",
+          "ostflügel",
+          "oficinas este",
+          "पूर्वी बिल्डिंग"
         ],
         "name_aliases_translatable": true,
         "name_aliases_base": [
@@ -538,7 +547,17 @@
           "vip-garage",
           "parkhaus executive",
           "एग्जीक्यूटिव गैरेज",
-          "एक्जीक्यूटिव पार्किंग"
+          "एक्जीक्यूटिव पार्किंग",
+          "garaż dla zarządu",
+          "garaż executive",
+          "parking dla zarządu",
+          "garaż kierownictwa",
+          "garage direction",
+          "garage des dirigeants",
+          "parking exécutif",
+          "executive-parkhaus",
+          "एग्जीक्यूटिव पार्किंग",
+          "अधिकारियों वाला गैरेज"
         ],
         "name_aliases_translatable": true,
         "name_aliases_base": [
@@ -566,7 +585,16 @@
           "नॉर्थ सरफेस लॉट",
           "नॉर्थ लॉट",
           "उत्तर वाला ओपन लॉट",
-          "उत्तर वाला ओपन पार्किंग"
+          "उत्तर वाला ओपन पार्किंग",
+          "północny parking naziemny",
+          "północny plac parkingowy",
+          "parking północny",
+          "północny parking",
+          "parking nord",
+          "aparcamiento norte",
+          "parking norte al aire libre",
+          "उत्तर पार्किंग लॉट",
+          "नॉर्थ ओपन पार्किंग"
         ],
         "name_aliases_translatable": true,
         "name_aliases_base": [

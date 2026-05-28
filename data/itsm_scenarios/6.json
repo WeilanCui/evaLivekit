@@ -541,7 +541,20 @@
           "finanzgebäude",
           "डाउनटाउन ऑफिस",
           "डाउनटाउन",
-          "फाइनेंस बिल्डिंग"
+          "फाइनेंस बिल्डिंग",
+          "biuro w centrum",
+          "downtown office",
+          "budynek finansów",
+          "finanse w centrum",
+          "biuro śródmieście",
+          "site finance",
+          "bureau downtown",
+          "les bureaux en ville",
+          "site finance du centre-ville",
+          "bureaux finance",
+          "büro in der innenstadt",
+          "finanzas",
+          "शहर वाला ऑफिस"
         ],
         "name_aliases_translatable": true,
         "name_aliases_base": [
@@ -641,7 +654,14 @@
           "nordgarage",
           "parkhaus nord",
           "नॉर्थ गैरेज",
-          "उत्तर वाला गैरेज"
+          "उत्तर वाला गैरेज",
+          "garaż północny",
+          "parking północny",
+          "garage im norden",
+          "le garage du nord",
+          "nord-parkhaus",
+          "उत्तर गैरेज",
+          "नॉर्थ पार्किंग"
         ],
         "zone_code": "PZA",
         "name_aliases_translatable": true,

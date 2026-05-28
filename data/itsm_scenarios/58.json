@@ -598,7 +598,11 @@
           "हेडक्वार्टर",
           "मुख्यालय",
           "एचक्यू",
-          "एच क्यू"
+          "एच क्यू",
+          "centrala",
+          "siedziba główna",
+          "siedziba",
+          "la sede"
         ],
         "name_aliases_translatable": true,
         "name_aliases_base": [
@@ -727,7 +731,17 @@
           "vip-garage",
           "parkhaus executive",
           "एग्जीक्यूटिव गैरेज",
-          "एक्जीक्यूटिव पार्किंग"
+          "एक्जीक्यूटिव पार्किंग",
+          "garaż dla zarządu",
+          "garaż executive",
+          "parking dla zarządu",
+          "garaż kierownictwa",
+          "garage direction",
+          "garage des dirigeants",
+          "parking exécutif",
+          "executive-parkhaus",
+          "एग्जीक्यूटिव पार्किंग",
+          "अधिकारियों वाला गैरेज"
         ],
         "zone_code": "PZE",
         "name_aliases_translatable": true,
@@ -752,7 +766,15 @@
           "standardgarage",
           "जनरल गैरेज",
           "मेन गैरेज",
-          "कॉमन गैरेज"
+          "कॉमन गैरेज",
+          "garaż ogólny",
+          "główny garaż",
+          "parking général",
+          "le garage principal",
+          "garaje principal",
+          "parkhaus allgemein",
+          "सामान्य गैरेज",
+          "मुख्य गैरेज"
         ],
         "zone_code": "PZG",
         "name_aliases_translatable": true,

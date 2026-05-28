@@ -420,7 +420,17 @@
           "downtown-technikzentrum",
           "डाउनटाउन इंजीनियरिंग सेंटर",
           "डाउनटाउन इंजीनियरिंग",
-          "डाउनटाउन वाला इंजीनियरिंग सेंटर"
+          "डाउनटाउन वाला इंजीनियरिंग सेंटर",
+          "centrum inżynieryjne w centrum",
+          "inżynieria w centrum",
+          "centrum techniczne w centrum",
+          "centrum inżynierów w śródmieściu",
+          "centre d’ingénierie downtown",
+          "engineering center downtown",
+          "ingeniería downtown",
+          "डाउनटाउन सेंटर",
+          "इंजीनियरिंग सेंटर",
+          "शहर वाला इंजीनियरिंग सेंटर"
         ],
         "name_aliases_translatable": true,
         "name_aliases_base": [
@@ -506,7 +516,17 @@
           "hauptgarage a",
           "गैरेज ए",
           "ए वाला गैरेज",
-          "मेन गैरेज"
+          "मेन गैरेज",
+          "garaż a",
+          "główny garaż",
+          "garage principal",
+          "el garaje principal",
+          "hauptgarage",
+          "hauptparkhaus",
+          "a-parkhaus",
+          "garaje principal",
+          "ए गैरेज",
+          "मुख्य गैरेज"
         ],
         "name_aliases_translatable": true,
         "name_aliases_base": [

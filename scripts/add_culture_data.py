@@ -50,7 +50,7 @@ Key arguments:
                         ``color``). Useful for languages with significant dialect
                         orthography divergence. English ships one by default; most
                         other languages don't need it.
-  --llm-model           Override the LLM used for generation (default: gpt-5.2).
+  --llm-model           Override the LLM used for generation (default: gpt-5.5).
   --record-id           Mutate only a single record — useful for spot-checking a diff.
   --dry-run             Print what would be written without touching any files.
 
@@ -107,7 +107,7 @@ ADDENDA_PATH = REPO_ROOT / "configs" / "agents" / "language_addenda.yaml"
 INITIAL_MESSAGES_PATH = REPO_ROOT / "configs" / "agents" / "initial_messages.yaml"
 WER_CONFIGS_DIR = REPO_ROOT / "src" / "eva" / "utils" / "wer_normalization" / "configs"
 
-DEFAULT_MODEL = "gpt-5.2"
+DEFAULT_MODEL = "gpt-5.5-2026-04-23"
 TRANSLATION_BATCH = 25
 ALIAS_BATCH = 50  # Max unique names per alias-translation LLM call.
 
@@ -666,7 +666,7 @@ Choose exactly one "family":
     conjunction word (German "einundzwanzig", Dutch "eenentwintig", Arabic
     "wahid wa-'ishrun", Hebrew "echad ve-esrim").
   - "lexicalized_below_100": numbers 1-99 are mostly distinct words rather than
-    composed (Hindi/Bengali native form). Put every word 1-99 in "ones",
+    composed (Hindi/Bengali native form). Put every word 1-99 in "cardinals",
     leave "tens" empty. Engine still handles 100+ compositionally.
   - "cjk": positional with 万/億 grouping (ZH/JA/KO). NOT supported by this script —
     return {{"family": "cjk", "reason": "..."}} and stop.
@@ -674,27 +674,62 @@ Choose exactly one "family":
 
 === STEP 2: vocabulary (the bulk of your work) ===
 
+The engine has two kinds of number-word entries:
+
+  (A) FIXED-VALUE words — a single word that means a single specific integer.
+      The engine looks them up directly. "twelve"=12, "thirty"=30. If a language
+      has a dedicated single word for, say, 500 (one token, not "five hundred"),
+      that's also a fixed-value word with value 500.
+
+  (B) SCALING words — words that multiply the running total by some factor.
+      "hundred", "thousand", "million", "lakh", "crore". These are NEVER
+      standalone values; they always scale a preceding cardinal ("two hundred"
+      = 2 × 100). If the word never appears alone meaning that exact number,
+      it's a scaling word.
+
+  ⚠️ The single most common error is putting a fixed-value compound (e.g. a
+  single-token word for 500) into the scaling list because "it equals 500".
+  Test: can the word stand alone meaning exactly that value? If yes → fixed.
+  Can it be preceded by a cardinal to scale it ("five [X]")? If yes → scaling.
+
+⚠️ A word must appear in EXACTLY ONE of {{cardinals, tens, scaling_units}}.
+The engine checks them in that order; a word in both `cardinals` and `tens`
+will be treated as a cardinal and break composition.
+
 Return these dicts under "vocabulary":
   - "zeros": list of words meaning zero (e.g. ["zero", "oh"]).
-  - "ones": {{word: int}} for cardinal small numbers. For alphabetic_ltr and
-    alphabetic_reversed_units, include 1-19 (or whatever range the language
-    composes lexically — French includes 1-16). For lexicalized_below_100,
-    include 1-99.
-  - "ones_extra": {{word: int}} additional surface forms (gender variants,
-    elided forms — e.g. French "une"=1, German "ein"=1 alongside "eins").
-  - "ones_suffixed": {{word: [int, suffix]}} for ordinals/plural forms.
-    Example: English "first": [1, "st"] → emits "1st". Optional; leave {{}} if
-    the language doesn't have clean suffix derivations.
-  - "tens": {{word: int}} multiples of 10. Empty {{}} for lexicalized_below_100.
-  - "tens_suffixed": same shape as ones_suffixed, for tens. Optional.
-  - "multipliers": {{word: int}} for "hundred", "thousand", "million", etc.
-    Include lakh=100000 and crore=10000000 for Indic languages.
-    IMPORTANT — Romance languages (Spanish, Portuguese) lexicalize hundreds
-    200-900 as single words (Spanish: doscientos, trescientos, cuatrocientos,
-    quinientos, seiscientos, setecientos, ochocientos, novecientos;
-    Portuguese: duzentos, trezentos, quatrocentos, ...). Put these in "ones"
-    with their numeric values (200, 300, ...), NOT in multipliers.
-  - "multipliers_suffixed": optional, same shape.
+  - "cardinals": {{word: int}} fixed-value cardinal words that are NOT a
+    multiple of 10. Specifically:
+      • alphabetic_ltr / alphabetic_reversed_units: 1-19 (English: one…nineteen,
+        French: un…seize plus "dix-sept" etc. if the language uses them as one
+        token). Plus any lexicalized larger values that aren't multiples of 10
+        — e.g. lexicalized hundreds 200, 300, 500, 700 … when expressed as
+        single words.
+      • lexicalized_below_100: every distinct word 1-99 (no `tens` needed).
+    NEVER put 20/30/…/90 in cardinals — they go in `tens`.
+  - "cardinal_variants": {{word: int}} alternate surface forms of the SAME
+    integer (gender/case/plural — French "une"=1, German "ein"=1, regional
+    Swiss/Belgian forms like French "septante"=70, "huitante"=80, "nonante"=90).
+  - "cardinals_suffixed": {{word: [int, suffix]}} ordinal/plural surface forms
+    that should emit a suffixed digit. STRONGLY ENCOURAGED for languages with
+    a productive ordinal pattern (most European languages do — English, French,
+    German, Spanish, Italian, Polish …). Examples:
+      English: {{"first": [1, "st"], "second": [2, "nd"], "third": [3, "rd"],
+                "fourth": [4, "th"], …}}
+      French:  {{"premier": [1, "er"], "première": [1, "ère"],
+                 "deuxième": [2, "ème"], "troisième": [3, "ème"], …}}
+      German:  {{"erste": [1, "."], "zweite": [2, "."], "dritte": [3, "."], …}}
+    Cover at least 1-19 + key ordinals like "twentieth". Leave {{}} only for
+    languages without a regular ordinal-suffix construction.
+  - "tens": {{word: int}} ALL multiples of 10 from 20 to 90 (or as many as the
+    language has — French stops at 60 because 70-90 are vigesimal). Include
+    plural/inflected forms here too: French "vingt"=20 AND "vingts"=20.
+    Empty {{}} for lexicalized_below_100.
+  - "tens_suffixed": same shape as cardinals_suffixed, for tens. Optional.
+  - "scaling_units": {{word: int}} multiplicative scaling words ONLY: "hundred",
+    "thousand", "million", "billion", "lakh", "crore". A word belongs here
+    only if it scales a preceding number rather than naming a fixed value.
+  - "scaling_units_suffixed": optional, same shape.
 
 === STEP 3: connective words ===
 
@@ -706,9 +741,32 @@ Return these dicts under "vocabulary":
 
   - "split_hyphenated_numbers": true if the language writes numbers like
     "quatre-vingt-dix" that must be split into tokens. False otherwise.
-  - "vigesimal": only for languages with French-style 70=60+10 / 80=4*20 forms.
-    Format: {{"trigger_words": ["vingt"], "residuals": [4,5,6,7,8,9]}}.
-    null for all other languages.
+  - "vigesimal": only for languages with vigesimal compositions like
+    French/Belgian-French/Swiss-French (where 70=60+10, 80=4*20, 90=4*20+10).
+    null for all other languages — including those that just have a vigesimal
+    word floating around without compositional use.
+    Format (each field is necessary, do not omit any):
+      {{
+        "trigger_words": [...],        // tens-words that participate in the
+                                        // multiplication. Include ALL surface
+                                        // forms. French: ["vingt", "vingts"].
+        "residuals": [...],            // values mod-100 that multiply the
+                                        // trigger word. French: [4,5,6,7,8,9]
+                                        // (because quatre/cinq/.../neuf × vingt
+                                        // = 80, 100 (handled elsewhere), …, 180).
+        "additive_teen_residuals": [...] // values mod-100 at which a following
+                                          // teen ADDS rather than concatenates.
+                                          // French: [60, 80] — soixante (60) +
+                                          // dix (10) = 70, quatre-vingt (80) +
+                                          // dix (10) = 90. (0 is added by the
+                                          // engine automatically; you can omit it.)
+      }}
+    Worked French example:
+      "quatre-vingt-dix-neuf" → tokens ["quatre","vingt","dix","neuf"]
+        quatre → value=4
+        vingt  → trigger fires (4 in residuals): value = 0 + 4*20 = 80
+        dix    → 80 in additive_teen_residuals: value = 80 + 10 = 90
+        neuf   → value % 10 == 0: value = 90 + 9 = 99  ✓
 
 === STEP 5: test cases ===
 
@@ -721,7 +779,26 @@ Return "test_cases" as a list of 15 [spelled_form, digit_form] pairs that exerci
 
 Return one JSON object with keys: family, vocabulary, conjunction_word,
 decimal_word, split_hyphenated_numbers, vigesimal, test_cases. Optionally a
-"reason" field. No markdown, no commentary."""
+"reason" field. No markdown, no commentary.
+
+Reminder on vocabulary shape:
+{{
+  "zeros": [...],
+  "cardinals": {{...}}, "cardinal_variants": {{...}}, "cardinals_suffixed": {{...}},
+  "tens": {{...}}, "tens_suffixed": {{...}},
+  "scaling_units": {{...}}, "scaling_units_suffixed": {{...}}
+}}"""
+
+
+_WER_RETRY_PROMPT = """The config you generated has {fail_count} failing round-trip test(s):
+
+{failures}
+
+Each line shows: spelled-out form → what the normalizer produced | digit form → what it produced.
+They should match but don't.
+
+Return the COMPLETE corrected JSON object (same schema as before — all keys, full vocabulary tables).
+No markdown, no commentary."""
 
 
 _TEXT_RULES_PROMPT = """For {language_name} (BCP-47: {language}), provide two short
@@ -853,32 +930,44 @@ def _build_full_config(language: str, llm_data: dict) -> dict:
     """
     family = llm_data.get("family")
     vocab = llm_data.get("vocabulary") or {}
-    vig = llm_data.get("vigesimal")
+    vig = llm_data.get("vigesimal") or {}
+
+    # Safety net: the engine matches cardinals before tens, so a word in both
+    # gets misclassified (commonly when the LLM puts "vingt" or other multiples
+    # of 10 in cardinals). Strip any cardinal that's also in tens with the same
+    # value — this is a deterministic correction, not a guess.
+    cardinals = dict(vocab.get("cardinals", {}))
+    tens = dict(vocab.get("tens", {}))
+    for word in list(cardinals):
+        if word in tens and cardinals[word] == tens[word]:
+            cardinals.pop(word)
+
+    # 0 is always an additive residual (a clean hundred-multiple should add).
+    additive = sorted({0, *vig.get("additive_teen_residuals", [])})
 
     cfg: dict = {
         "code": language,
         "zeros": vocab.get("zeros", []),
-        "ones": vocab.get("ones", {}),
-        "ones_extra": vocab.get("ones_extra", {}),
-        "ones_suffixed": vocab.get("ones_suffixed", {}),
-        "tens": vocab.get("tens", {}),
+        "cardinals": cardinals,
+        "cardinal_variants": vocab.get("cardinal_variants", {}),
+        "cardinals_suffixed": vocab.get("cardinals_suffixed", {}),
+        "tens": tens,
         "tens_suffixed": vocab.get("tens_suffixed", {}),
-        "multipliers": vocab.get("multipliers", {}),
-        "multipliers_suffixed": vocab.get("multipliers_suffixed", {}),
+        "scaling_units": vocab.get("scaling_units", {}),
+        "scaling_units_suffixed": vocab.get("scaling_units_suffixed", {}),
         # Connectives
         "conjunction_word": llm_data.get("conjunction_word"),
         "decimal_word": llm_data.get("decimal_word"),
         # Structural flags
         "reversed_units": family == "alphabetic_reversed_units",
         "split_hyphenated_numbers": bool(llm_data.get("split_hyphenated_numbers")),
-        # Vigesimal (only when explicitly requested)
-        "vigesimal_trigger_words": (vig or {}).get("trigger_words", []),
+        # Vigesimal — only set when the LLM explicitly classifies the language.
+        "vigesimal_trigger_words": vig.get("trigger_words", []),
         "vigesimal_multiplier": 20,
-        "vigesimal_residuals": (vig or {}).get("residuals", []),
-        # English-specific behavioural flags — safe defaults
-        "high_ones_residuals": [0],
-        "ones_continuation_on_prev_ones": False,
-        "conjunction_ignore_prev": ["multipliers", "tens"] if llm_data.get("conjunction_word") else [],
+        "vigesimal_residuals": vig.get("residuals", []),
+        "additive_teen_residuals": additive,
+        "cardinal_continuation_on_prev_cardinal": False,
+        "conjunction_ignore_prev": ["scaling_units", "tens"] if llm_data.get("conjunction_word") else [],
         "repeat_words": {},
         "half_pattern": None,
         "half_replacement": None,
@@ -919,10 +1008,8 @@ async def _generate_wer_config(
          pass rate. Write the config regardless so the user has a starting point.
     """
     prompt = _WER_PROMPT.format(language_name=language_name, language=language)
-    text, _ = await llm.generate_text(
-        [{"role": "user", "content": prompt}],
-        response_format={"type": "json_object"},
-    )
+    messages: list[dict] = [{"role": "user", "content": prompt}]
+    text, _ = await llm.generate_text(messages, response_format={"type": "json_object"})
     llm_data = extract_and_load_json(text)
 
     family = llm_data.get("family")
@@ -983,8 +1070,36 @@ async def _generate_wer_config(
         logger.info(f"Round-trip tests for {language}: {pass_count}/{total} passed")
         for spelled, digits, spelled_norm, digits_norm in failures:
             logger.warning(f"  FAIL: {spelled!r} -> {spelled_norm!r}  vs  {digits!r} -> {digits_norm!r}")
-        if pass_count < total:
-            logger.warning(f"Inspect {language}.json and fix vocabulary entries for failing cases above.")
+
+    if failures and not dry_run:
+        logger.info(f"Retrying with {len(failures)} failure(s) shown to the model …")
+        failure_lines = "\n".join(
+            f"  {spelled!r} -> {sn!r}  |  {digits!r} -> {dn!r}" for spelled, digits, sn, dn in failures
+        )
+        retry_prompt = _WER_RETRY_PROMPT.format(fail_count=len(failures), failures=failure_lines)
+        messages.append({"role": "assistant", "content": text})
+        messages.append({"role": "user", "content": retry_prompt})
+        retry_text, _ = await llm.generate_text(messages, response_format={"type": "json_object"})
+        retry_data = extract_and_load_json(retry_text)
+
+        retry_cfg = _build_full_config(language, retry_data)
+        retry_cfg["ignore_patterns"] = cfg.get("ignore_patterns")
+        retry_cfg["replacers"] = cfg.get("replacers", {})
+        try:
+            LanguageConfig.model_validate(retry_cfg)
+        except ValidationError as exc:
+            logger.warning(f"Retry config failed validation ({exc}); keeping original.")
+        else:
+            out.write_text(json.dumps(retry_cfg, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+            logger.info(f"Overwrote {out.name} with retry config")
+            retry_pass, retry_failures = _run_wer_round_trip_tests(language, test_cases)
+            logger.info(f"Round-trip tests after retry: {retry_pass}/{total} passed")
+            for spelled, digits, spelled_norm, digits_norm in retry_failures:
+                logger.warning(f"  FAIL: {spelled!r} -> {spelled_norm!r}  vs  {digits!r} -> {digits_norm!r}")
+            if retry_failures:
+                logger.warning(f"Inspect {language}.json and fix vocabulary entries for failing cases above.")
+    elif pass_count < total:
+        logger.warning(f"Inspect {language}.json and fix vocabulary entries for failing cases above.")
 
 
 def _run_wer_round_trip_tests(language: str, test_cases: list) -> tuple[int, list[tuple[str, str, str, str]]]:

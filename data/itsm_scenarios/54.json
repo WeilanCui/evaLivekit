@@ -419,7 +419,11 @@
           "हेडक्वार्टर",
           "मुख्यालय",
           "एचक्यू",
-          "एच क्यू"
+          "एच क्यू",
+          "centrala",
+          "siedziba główna",
+          "siedziba",
+          "la sede"
         ],
         "name_aliases_translatable": true,
         "name_aliases_base": [
@@ -594,7 +598,13 @@
           "parken süd",
           "साउथ गैरेज",
           "दक्षिण वाला गैरेज",
-          "साउथ पार्किंग"
+          "साउथ पार्किंग",
+          "garaż południowy",
+          "parking południowy",
+          "le parking du sud",
+          "süd-parkhaus",
+          "दक्षिण गैरेज",
+          "दक्षिण पार्किंग"
         ],
         "name_aliases_translatable": true,
         "name_aliases_base": [
@@ -618,7 +628,14 @@
           "nordparkplatz bei der zentrale",
           "नॉर्थ लॉट",
           "नॉर्थ पार्किंग",
-          "हेडक्वार्टर का नॉर्थ लॉट"
+          "हेडक्वार्टर का नॉर्थ लॉट",
+          "północny parking",
+          "północny plac",
+          "parking północny przy centrali",
+          "parking nord en surface",
+          "parking norte de la sede",
+          "nord-lot",
+          "उत्तर लॉट"
         ],
         "name_aliases_translatable": true,
         "name_aliases_base": [

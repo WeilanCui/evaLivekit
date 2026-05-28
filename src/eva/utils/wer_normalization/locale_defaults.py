@@ -39,7 +39,7 @@ LETTER_CLASS_BY_SCRIPT: dict[str, str] = {
 # `thousand_separators`: subset of {"comma", "dot", "space"}
 SEPARATORS_BY_LANG: dict[str, dict] = {
     "en": {"decimal_separator": "dot", "thousand_separators": ["comma"]},
-    "fr": {"decimal_separator": "comma", "thousand_separators": ["space"]},
+    "fr": {"decimal_separator": "comma", "thousand_separators": ["dot", "space"]},
     "de": {"decimal_separator": "comma", "thousand_separators": ["dot", "space"]},
     "nl": {"decimal_separator": "comma", "thousand_separators": ["dot"]},
     "es": {"decimal_separator": "comma", "thousand_separators": ["dot", "space"]},

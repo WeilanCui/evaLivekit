@@ -40,13 +40,13 @@ class LanguageConfig(BaseModel):
 
     # --- Number word maps (suffixed = plural/ordinal merged) -------------
     zeros: list[str]
-    ones: dict[str, int]
-    ones_extra: dict[str, int] = Field(default_factory=dict)
-    ones_suffixed: dict[str, tuple[int, str]] = Field(default_factory=dict)
+    cardinals: dict[str, int]
+    cardinal_variants: dict[str, int] = Field(default_factory=dict)
+    cardinals_suffixed: dict[str, tuple[int, str]] = Field(default_factory=dict)
     tens: dict[str, int] = Field(default_factory=dict)
     tens_suffixed: dict[str, tuple[int, str]] = Field(default_factory=dict)
-    multipliers: dict[str, int] = Field(default_factory=dict)
-    multipliers_suffixed: dict[str, tuple[int, str]] = Field(default_factory=dict)
+    scaling_units: dict[str, int] = Field(default_factory=dict)
+    scaling_units_suffixed: dict[str, tuple[int, str]] = Field(default_factory=dict)
 
     # --- Symbols / currency / percent ------------------------------------
     preceding_prefixers: dict[str, str] = Field(default_factory=dict)
@@ -71,11 +71,11 @@ class LanguageConfig(BaseModel):
 
     # Which ``value % 100`` residuals allow ones>=10 (e.g. "dix") to be
     # added (rather than concatenated as a string). EN: [0]; FR: [0, 60, 80].
-    high_ones_residuals: list[int] = Field(default_factory=lambda: [0])
+    additive_teen_residuals: list[int] = Field(default_factory=lambda: [0])
 
     # Whether ones combination also fires when prev was a ones word and
     # ``value`` is still int (English needs this for "one oh one" form).
-    ones_continuation_on_prev_ones: bool = False
+    cardinal_continuation_on_prev_cardinal: bool = False
 
     # --- Preprocessing ---------------------------------------------------
     half_pattern: str | None = None  # e.g. r"\band\s+a\s+half\b"
@@ -136,18 +136,18 @@ class GenericNumberNormalizer:
         _strip_suffixed = lambda d: {strip(k): (v[0], strip(v[1])) for k, v in d.items()}  # noqa: E731
 
         self.zeros = {strip(w) for w in config.zeros}
-        self.ones = {**_strip_dict(config.ones), **_strip_dict(config.ones_extra)}
-        self.ones_suffixed = _strip_suffixed(config.ones_suffixed)
+        self.cardinals = {**_strip_dict(config.cardinals), **_strip_dict(config.cardinal_variants)}
+        self.cardinals_suffixed = _strip_suffixed(config.cardinals_suffixed)
         self.tens = _strip_dict(config.tens)
         self.tens_suffixed = _strip_suffixed(config.tens_suffixed)
-        self.multipliers = _strip_dict(config.multipliers)
-        self.multipliers_suffixed = _strip_suffixed(config.multipliers_suffixed)
+        self.scaling_units = _strip_dict(config.scaling_units)
+        self.scaling_units_suffixed = _strip_suffixed(config.scaling_units_suffixed)
         self.preceding_prefixers = _strip_dict(config.preceding_prefixers)
         self.following_prefixers = _strip_dict(config.following_prefixers)
         self.prefixes = set(list(self.preceding_prefixers.values()) + list(self.following_prefixers.values()))
         self.suffixers = {strip(k): v for k, v in config.suffixers.items()}
         self.repeat_words = _strip_dict(config.repeat_words)
-        self.decimals = {*self.ones, *self.tens, *self.zeros}
+        self.decimals = {*self.cardinals, *self.tens, *self.zeros}
 
         self.specials: set[str] = set()
         if config.conjunction_word:
@@ -158,12 +158,12 @@ class GenericNumberNormalizer:
 
         self.words = (
             set(self.zeros)
-            | set(self.ones)
-            | set(self.ones_suffixed)
+            | set(self.cardinals)
+            | set(self.cardinals_suffixed)
             | set(self.tens)
             | set(self.tens_suffixed)
-            | set(self.multipliers)
-            | set(self.multipliers_suffixed)
+            | set(self.scaling_units)
+            | set(self.scaling_units_suffixed)
             | set(self.preceding_prefixers)
             | set(self.following_prefixers)
             | set(self.suffixers)
@@ -173,31 +173,33 @@ class GenericNumberNormalizer:
         self._reversed_units_glued: re.Pattern | None = None
         self._reversed_units_spaced: re.Pattern | None = None
         self._glued_splitters: list[re.Pattern] = []
-        if config.reversed_units and self.ones:
-            ones_pat = "|".join(re.escape(w) for w in sorted(self.ones, key=len, reverse=True))
+        if config.reversed_units and self.cardinals:
+            cardinals_pat = "|".join(re.escape(w) for w in sorted(self.cardinals, key=len, reverse=True))
             if config.conjunction_word and self.tens:
                 conj_stripped = remove_symbols_and_diacritics(config.conjunction_word, keep="")
                 tens_pat = "|".join(re.escape(w) for w in sorted(self.tens, key=len, reverse=True))
                 conj = re.escape(conj_stripped)
-                self._reversed_units_glued = re.compile(rf"\b({ones_pat}){conj}({tens_pat})\b", re.IGNORECASE)
-                self._reversed_units_spaced = re.compile(rf"\b({ones_pat})\s+{conj}\s+({tens_pat})\b", re.IGNORECASE)
-            if self.multipliers:
-                mult_pat = "|".join(re.escape(w) for w in sorted(self.multipliers, key=len, reverse=True))
+                self._reversed_units_glued = re.compile(rf"\b({cardinals_pat}){conj}({tens_pat})\b", re.IGNORECASE)
+                self._reversed_units_spaced = re.compile(
+                    rf"\b({cardinals_pat})\s+{conj}\s+({tens_pat})\b", re.IGNORECASE
+                )
+            if self.scaling_units:
+                scale_pat = "|".join(re.escape(w) for w in sorted(self.scaling_units, key=len, reverse=True))
                 tens_pat = "|".join(re.escape(w) for w in sorted(self.tens, key=len, reverse=True)) if self.tens else ""
                 # Split glued <ones><multiplier> compounds ("zweihundert" → "zwei hundert").
                 # No trailing \b: in mega-compounds the next char is a letter,
                 # not a boundary. Iteration in preprocess() converges.
-                self._glued_splitters.append(re.compile(rf"\b({ones_pat})({mult_pat})", re.IGNORECASE))
+                self._glued_splitters.append(re.compile(rf"\b({cardinals_pat})({scale_pat})", re.IGNORECASE))
                 # Split glued <multiplier><ones|tens> compounds
                 # ("hunderteinundzwanzig" → "hundert einundzwanzig",
                 # "tausendzwanzig" → "tausend zwanzig").
-                after_alts = ones_pat + (f"|{tens_pat}" if tens_pat else "")
-                self._glued_splitters.append(re.compile(rf"\b({mult_pat})({after_alts})", re.IGNORECASE))
+                after_alts = cardinals_pat + (f"|{tens_pat}" if tens_pat else "")
+                self._glued_splitters.append(re.compile(rf"\b({scale_pat})({after_alts})", re.IGNORECASE))
 
-    def _ones_should_concat_as_str(self, prev: str | None, value: int | str | None) -> bool:
+    def _cardinal_should_concat_as_str(self, prev: str | None, value: int | str | None) -> bool:
         if isinstance(value, str):
             return True
-        if self.config.ones_continuation_on_prev_ones and prev in self.ones:
+        if self.config.cardinal_continuation_on_prev_cardinal and prev in self.cardinals:
             return True
         return False
 
@@ -256,46 +258,46 @@ class GenericNumberNormalizer:
                 yield output(current)
             elif current in self.zeros:
                 value = str(value or "") + "0"
-            elif current in self.ones:
-                ones = self.ones[current]
+            elif current in self.cardinals:
+                n = self.cardinals[current]
                 if value is None:
-                    value = ones
-                elif self._ones_should_concat_as_str(prev, value):
-                    if prev in self.tens and ones < 10:
+                    value = n
+                elif self._cardinal_should_concat_as_str(prev, value):
+                    if prev in self.tens and n < 10:
                         assert isinstance(value, str) and value[-1] == "0"
-                        value = value[:-1] + str(ones)
+                        value = value[:-1] + str(n)
                     else:
-                        value = str(value) + str(ones)
-                elif ones < 10:
+                        value = str(value) + str(n)
+                elif n < 10:
                     if value % 10 == 0:
-                        value += ones
+                        value += n
                     else:
-                        value = str(value) + str(ones)
+                        value = str(value) + str(n)
                 else:  # ones >= 10 (teens / dix-seize)
-                    if value % 100 in self.config.high_ones_residuals:
-                        value += ones
+                    if value % 100 in self.config.additive_teen_residuals:
+                        value += n
                     else:
-                        value = str(value) + str(ones)
-            elif current in self.ones_suffixed:
-                ones, suffix = self.ones_suffixed[current]
+                        value = str(value) + str(n)
+            elif current in self.cardinals_suffixed:
+                n, suffix = self.cardinals_suffixed[current]
                 if value is None:
-                    yield output(str(ones) + suffix)
-                elif self._ones_should_concat_as_str(prev, value):
-                    if prev in self.tens and ones < 10:
+                    yield output(str(n) + suffix)
+                elif self._cardinal_should_concat_as_str(prev, value):
+                    if prev in self.tens and n < 10:
                         assert isinstance(value, str) and value[-1] == "0"
-                        yield output(value[:-1] + str(ones) + suffix)
+                        yield output(value[:-1] + str(n) + suffix)
                     else:
-                        yield output(str(value) + str(ones) + suffix)
-                elif ones < 10:
+                        yield output(str(value) + str(n) + suffix)
+                elif n < 10:
                     if value % 10 == 0:
-                        yield output(str(value + ones) + suffix)
+                        yield output(str(value + n) + suffix)
                     else:
-                        yield output(str(value) + str(ones) + suffix)
+                        yield output(str(value) + str(n) + suffix)
                 else:
-                    if value % 100 in self.config.high_ones_residuals:
-                        yield output(str(value + ones) + suffix)
+                    if value % 100 in self.config.additive_teen_residuals:
+                        yield output(str(value + n) + suffix)
                     else:
-                        yield output(str(value) + str(ones) + suffix)
+                        yield output(str(value) + str(n) + suffix)
                 value = None
             elif current in self.tens:
                 tens = self.tens[current]
@@ -327,38 +329,38 @@ class GenericNumberNormalizer:
                         yield output(str(value + tens) + suffix)
                     else:
                         yield output(str(value) + str(tens) + suffix)
-            elif current in self.multipliers:
-                multiplier = self.multipliers[current]
+            elif current in self.scaling_units:
+                scale = self.scaling_units[current]
                 if value is None:
-                    value = multiplier
+                    value = scale
                 elif isinstance(value, str) or value == 0:
                     f = to_fraction(value)
-                    p = f * multiplier if f is not None else None
+                    p = f * scale if f is not None else None
                     if f is not None and p.denominator == 1:
                         value = p.numerator
                     else:
                         yield output(value)
-                        value = multiplier
+                        value = scale
                 else:
                     before = value // 1000 * 1000
                     residual = value % 1000
-                    value = before + residual * multiplier
-            elif current in self.multipliers_suffixed:
-                multiplier, suffix = self.multipliers_suffixed[current]
+                    value = before + residual * scale
+            elif current in self.scaling_units_suffixed:
+                scale, suffix = self.scaling_units_suffixed[current]
                 if value is None:
-                    yield output(str(multiplier) + suffix)
+                    yield output(str(scale) + suffix)
                 elif isinstance(value, str):
                     f = to_fraction(value)
-                    p = f * multiplier if f is not None else None
+                    p = f * scale if f is not None else None
                     if f is not None and p.denominator == 1:
                         yield output(str(p.numerator) + suffix)
                     else:
                         yield output(value)
-                        yield output(str(multiplier) + suffix)
+                        yield output(str(scale) + suffix)
                 else:
                     before = value // 1000 * 1000
                     residual = value % 1000
-                    value = before + residual * multiplier
+                    value = before + residual * scale
                     yield output(str(value) + suffix)
                 value = None
             elif current in self.preceding_prefixers:
@@ -399,10 +401,10 @@ class GenericNumberNormalizer:
                             yield output(value)
                         yield output(current)
                 elif current in self.repeat_words:
-                    if nxt in self.ones or nxt in self.zeros:
+                    if nxt in self.cardinals or nxt in self.zeros:
                         repeats = self.repeat_words[current]
-                        ones_val = self.ones.get(nxt, 0)
-                        value = str(value or "") + str(ones_val) * repeats
+                        cardinal_val = self.cardinals.get(nxt, 0)
+                        value = str(value or "") + str(cardinal_val) * repeats
                         skip = True
                     else:
                         if value is not None:
@@ -431,7 +433,7 @@ class GenericNumberNormalizer:
                 else:
                     results.append(segment)
                     last_word = segment.rsplit(maxsplit=2)[-1]
-                    if last_word in self.decimals or last_word in self.multipliers:
+                    if last_word in self.decimals or last_word in self.scaling_units:
                         results.append(self.config.half_replacement)
                     else:
                         # keep original literal (reconstruct rough form)

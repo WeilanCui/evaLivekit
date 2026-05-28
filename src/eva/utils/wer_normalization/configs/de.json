@@ -2,10 +2,10 @@
   "code": "de",
   "zeros": [
     "null",
-    "nullen",
+    "nul",
     "zero"
   ],
-  "ones": {
+  "cardinals": {
     "eins": 1,
     "zwei": 2,
     "drei": 3,
@@ -26,7 +26,7 @@
     "achtzehn": 18,
     "neunzehn": 19
   },
-  "ones_extra": {
+  "cardinal_variants": {
     "ein": 1,
     "eine": 1,
     "einen": 1,
@@ -34,10 +34,316 @@
     "einer": 1,
     "zwo": 2
   },
-  "ones_suffixed": {},
+  "cardinals_suffixed": {
+    "erste": [
+      1,
+      "."
+    ],
+    "erster": [
+      1,
+      "."
+    ],
+    "erstes": [
+      1,
+      "."
+    ],
+    "ersten": [
+      1,
+      "."
+    ],
+    "zweite": [
+      2,
+      "."
+    ],
+    "zweiter": [
+      2,
+      "."
+    ],
+    "zweites": [
+      2,
+      "."
+    ],
+    "zweiten": [
+      2,
+      "."
+    ],
+    "dritte": [
+      3,
+      "."
+    ],
+    "dritter": [
+      3,
+      "."
+    ],
+    "drittes": [
+      3,
+      "."
+    ],
+    "dritten": [
+      3,
+      "."
+    ],
+    "vierte": [
+      4,
+      "."
+    ],
+    "vierter": [
+      4,
+      "."
+    ],
+    "viertes": [
+      4,
+      "."
+    ],
+    "vierten": [
+      4,
+      "."
+    ],
+    "fünfte": [
+      5,
+      "."
+    ],
+    "fünfter": [
+      5,
+      "."
+    ],
+    "fünftes": [
+      5,
+      "."
+    ],
+    "fünften": [
+      5,
+      "."
+    ],
+    "sechste": [
+      6,
+      "."
+    ],
+    "sechster": [
+      6,
+      "."
+    ],
+    "sechstes": [
+      6,
+      "."
+    ],
+    "sechsten": [
+      6,
+      "."
+    ],
+    "siebte": [
+      7,
+      "."
+    ],
+    "siebter": [
+      7,
+      "."
+    ],
+    "siebtes": [
+      7,
+      "."
+    ],
+    "siebten": [
+      7,
+      "."
+    ],
+    "achte": [
+      8,
+      "."
+    ],
+    "achter": [
+      8,
+      "."
+    ],
+    "achtes": [
+      8,
+      "."
+    ],
+    "achten": [
+      8,
+      "."
+    ],
+    "neunte": [
+      9,
+      "."
+    ],
+    "neunter": [
+      9,
+      "."
+    ],
+    "neuntes": [
+      9,
+      "."
+    ],
+    "neunten": [
+      9,
+      "."
+    ],
+    "zehnte": [
+      10,
+      "."
+    ],
+    "zehnter": [
+      10,
+      "."
+    ],
+    "zehntes": [
+      10,
+      "."
+    ],
+    "zehnten": [
+      10,
+      "."
+    ],
+    "elfte": [
+      11,
+      "."
+    ],
+    "elfter": [
+      11,
+      "."
+    ],
+    "elftes": [
+      11,
+      "."
+    ],
+    "elften": [
+      11,
+      "."
+    ],
+    "zwölfte": [
+      12,
+      "."
+    ],
+    "zwölfter": [
+      12,
+      "."
+    ],
+    "zwölftes": [
+      12,
+      "."
+    ],
+    "zwölften": [
+      12,
+      "."
+    ],
+    "dreizehnte": [
+      13,
+      "."
+    ],
+    "dreizehnter": [
+      13,
+      "."
+    ],
+    "dreizehntes": [
+      13,
+      "."
+    ],
+    "dreizehnten": [
+      13,
+      "."
+    ],
+    "vierzehnte": [
+      14,
+      "."
+    ],
+    "vierzehnter": [
+      14,
+      "."
+    ],
+    "vierzehntes": [
+      14,
+      "."
+    ],
+    "vierzehnten": [
+      14,
+      "."
+    ],
+    "fünfzehnte": [
+      15,
+      "."
+    ],
+    "fünfzehnter": [
+      15,
+      "."
+    ],
+    "fünfzehntes": [
+      15,
+      "."
+    ],
+    "fünfzehnten": [
+      15,
+      "."
+    ],
+    "sechzehnte": [
+      16,
+      "."
+    ],
+    "sechzehnter": [
+      16,
+      "."
+    ],
+    "sechzehntes": [
+      16,
+      "."
+    ],
+    "sechzehnten": [
+      16,
+      "."
+    ],
+    "siebzehnte": [
+      17,
+      "."
+    ],
+    "siebzehnter": [
+      17,
+      "."
+    ],
+    "siebzehntes": [
+      17,
+      "."
+    ],
+    "siebzehnten": [
+      17,
+      "."
+    ],
+    "achtzehnte": [
+      18,
+      "."
+    ],
+    "achtzehnter": [
+      18,
+      "."
+    ],
+    "achtzehntes": [
+      18,
+      "."
+    ],
+    "achtzehnten": [
+      18,
+      "."
+    ],
+    "neunzehnte": [
+      19,
+      "."
+    ],
+    "neunzehnter": [
+      19,
+      "."
+    ],
+    "neunzehntes": [
+      19,
+      "."
+    ],
+    "neunzehnten": [
+      19,
+      "."
+    ]
+  },
   "tens": {
     "zwanzig": 20,
     "dreißig": 30,
+    "dreissig": 30,
     "vierzig": 40,
     "fünfzig": 50,
     "sechzig": 60,
@@ -45,16 +351,163 @@
     "achtzig": 80,
     "neunzig": 90
   },
-  "tens_suffixed": {},
-  "multipliers": {
+  "tens_suffixed": {
+    "zwanzigste": [
+      20,
+      "."
+    ],
+    "zwanzigster": [
+      20,
+      "."
+    ],
+    "zwanzigstes": [
+      20,
+      "."
+    ],
+    "zwanzigsten": [
+      20,
+      "."
+    ],
+    "dreißigste": [
+      30,
+      "."
+    ],
+    "dreißigster": [
+      30,
+      "."
+    ],
+    "dreißigstes": [
+      30,
+      "."
+    ],
+    "dreißigsten": [
+      30,
+      "."
+    ],
+    "dreissigste": [
+      30,
+      "."
+    ],
+    "dreissigster": [
+      30,
+      "."
+    ],
+    "dreissigstes": [
+      30,
+      "."
+    ],
+    "dreissigsten": [
+      30,
+      "."
+    ],
+    "vierzigste": [
+      40,
+      "."
+    ],
+    "vierzigster": [
+      40,
+      "."
+    ],
+    "vierzigstes": [
+      40,
+      "."
+    ],
+    "vierzigsten": [
+      40,
+      "."
+    ],
+    "fünfzigste": [
+      50,
+      "."
+    ],
+    "fünfzigster": [
+      50,
+      "."
+    ],
+    "fünfzigstes": [
+      50,
+      "."
+    ],
+    "fünfzigsten": [
+      50,
+      "."
+    ],
+    "sechzigste": [
+      60,
+      "."
+    ],
+    "sechzigster": [
+      60,
+      "."
+    ],
+    "sechzigstes": [
+      60,
+      "."
+    ],
+    "sechzigsten": [
+      60,
+      "."
+    ],
+    "siebzigste": [
+      70,
+      "."
+    ],
+    "siebzigster": [
+      70,
+      "."
+    ],
+    "siebzigstes": [
+      70,
+      "."
+    ],
+    "siebzigsten": [
+      70,
+      "."
+    ],
+    "achtzigste": [
+      80,
+      "."
+    ],
+    "achtzigster": [
+      80,
+      "."
+    ],
+    "achtzigstes": [
+      80,
+      "."
+    ],
+    "achtzigsten": [
+      80,
+      "."
+    ],
+    "neunzigste": [
+      90,
+      "."
+    ],
+    "neunzigster": [
+      90,
+      "."
+    ],
+    "neunzigstes": [
+      90,
+      "."
+    ],
+    "neunzigsten": [
+      90,
+      "."
+    ]
+  },
+  "scaling_units": {
     "hundert": 100,
     "tausend": 1000,
     "million": 1000000,
     "millionen": 1000000,
     "milliarde": 1000000000,
-    "milliarden": 1000000000
+    "milliarden": 1000000000,
+    "billion": 1000000000000,
+    "billionen": 1000000000000
   },
-  "multipliers_suffixed": {},
+  "scaling_units_suffixed": {},
   "conjunction_word": "und",
   "decimal_word": "komma",
   "reversed_units": true,
@@ -62,12 +515,12 @@
   "vigesimal_trigger_words": [],
   "vigesimal_multiplier": 20,
   "vigesimal_residuals": [],
-  "high_ones_residuals": [
+  "additive_teen_residuals": [
     0
   ],
-  "ones_continuation_on_prev_ones": false,
+  "cardinal_continuation_on_prev_cardinal": false,
   "conjunction_ignore_prev": [
-    "multipliers",
+    "scaling_units",
     "tens"
   ],
   "repeat_words": {},
@@ -79,7 +532,7 @@
   "preceding_prefixers": {},
   "following_prefixers": {},
   "suffixers": {},
-  "ignore_patterns": "\\b(ah|ahm|hm|hmm|mhm|ahh|ohm|naja|tja|ahja|mm|puh)\\b",
+  "ignore_patterns": "\\b(ah|ahm|hm|hmm|mhm|ahh|ohm|naja|tja|also|nun|ahja)\\b",
   "replacers": {
     "\\bhr\\b": "herr",
     "\\bfr\\b": "frau",
@@ -90,13 +543,14 @@
     "\\bmag\\b": "magister",
     "\\bdir\\b": "direktor",
     "\\bgen\\b": "general",
-    "\\bpras\\b": "prasident",
+    "\\bhptm\\b": "hauptmann",
     "\\bfrl\\b": "fraulein"
   },
   "strip_space_before_apostrophe": false,
   "ordinal_suffix_pattern": "",
   "spelling_map_path": null,
   "letter_class": "a-zà-öø-ÿœæ",
+  "preserve_combining_marks": false,
   "decimal_separator": "comma",
   "thousand_separators": [
     "dot",

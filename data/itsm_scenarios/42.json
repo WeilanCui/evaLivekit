@@ -479,7 +479,11 @@
           "हेडक्वार्टर",
           "मुख्यालय",
           "एचक्यू",
-          "एच क्यू"
+          "एच क्यू",
+          "centrala",
+          "siedziba główna",
+          "siedziba",
+          "la sede"
         ],
         "parking_zones": {
           "PZA": {
@@ -623,7 +627,17 @@
           "जनरल सरफेस लॉट",
           "जनरल लॉट",
           "कॉमन लॉट",
-          "कॉमन पार्किंग लॉट"
+          "कॉमन पार्किंग लॉट",
+          "ogólny parking naziemny",
+          "ogólny plac parkingowy",
+          "parking ogólny",
+          "parking en surface général",
+          "parking visiteurs",
+          "parking général en surface",
+          "besucherparkplatz",
+          "सामान्य पार्किंग लॉट",
+          "जनरल ओपन पार्किंग",
+          "सामान्य लॉट"
         ],
         "zone_code": "PZA",
         "name_aliases_translatable": true,
@@ -653,7 +667,17 @@
           "vip-garage",
           "parkhaus executive",
           "एग्जीक्यूटिव गैरेज",
-          "एक्जीक्यूटिव पार्किंग"
+          "एक्जीक्यूटिव पार्किंग",
+          "garaż dla zarządu",
+          "garaż executive",
+          "parking dla zarządu",
+          "garaż kierownictwa",
+          "garage direction",
+          "garage des dirigeants",
+          "parking exécutif",
+          "executive-parkhaus",
+          "एग्जीक्यूटिव पार्किंग",
+          "अधिकारियों वाला गैरेज"
         ],
         "zone_code": "PZE",
         "name_aliases_translatable": true,

@@ -666,7 +666,12 @@
           "innenstadtgebäude",
           "downtown-gebäude",
           "डाउनटाउन",
-          "डाउनटाउन बिल्डिंग"
+          "डाउनटाउन बिल्डिंग",
+          "centrum",
+          "budynek w centrum",
+          "śródmieście",
+          "le site du centre-ville",
+          "शहर वाला ऑफिस"
         ],
         "name_aliases_translatable": true,
         "name_aliases_base": [
@@ -782,7 +787,17 @@
           "vip-garage",
           "parkhaus executive",
           "एग्जीक्यूटिव गैरेज",
-          "एक्जीक्यूटिव पार्किंग"
+          "एक्जीक्यूटिव पार्किंग",
+          "garaż dla zarządu",
+          "garaż executive",
+          "parking dla zarządu",
+          "garaż kierownictwa",
+          "garage direction",
+          "garage des dirigeants",
+          "parking exécutif",
+          "executive-parkhaus",
+          "एग्जीक्यूटिव पार्किंग",
+          "अधिकारियों वाला गैरेज"
         ],
         "zone_code": "PZA",
         "name_aliases_translatable": true,
