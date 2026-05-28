@@ -209,7 +209,7 @@ class AgenticSystem:
                 reasoning_tokens = llm_stats.get("reasoning_tokens", 0)
 
                 # Log if reasoning tokens are present but no reasoning content
-                if reasoning_tokens > 0 and not reasoning_content_for_csv:
+                if reasoning_tokens is not None and reasoning_tokens > 0 and not reasoning_content_for_csv:
                     logger.debug(
                         f"⚠️ Model used {reasoning_tokens} reasoning tokens but did not return thinking blocks."
                     )
