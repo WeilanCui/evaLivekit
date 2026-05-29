@@ -11,7 +11,9 @@ from eva.metrics.aggregation import (
     compute_record_aggregates,
     compute_run_level_aggregates,
 )
-from eva.models.results import MetricScore, RecordMetrics
+from eva.metrics.runner import MetricsRunner
+from eva.models.results import MetricScore, PassAtKResult, RecordMetrics
+from eva.utils.bootstrap import run_seed
 
 from .conftest import make_record_metrics
 
@@ -593,4 +595,161 @@ class TestRunLevelPassKCIs:
             block["pass_power_k_observed_ci_lower"]
             <= block["pass_power_k_observed"]
             <= block["pass_power_k_observed_ci_upper"]
+        )
+
+
+class TestPerMetricCIs:
+    def _records_with_metric(self, name: str, values: list[tuple[str, float | None]]):
+        """Build a dict[record_id, RecordMetrics] from (record_id, value) pairs.
+        ``None`` value means the metric is errored for that record.
+        """
+        out = {}
+        for rid, v in values:
+            if v is None:
+                m = MetricScore(name=name, score=0.0, error="boom")
+            else:
+                m = MetricScore(name=name, score=v, normalized_score=v)
+            out[rid] = RecordMetrics(record_id=rid, metrics={name: m})
+        return out
+
+    def test_per_metric_mean_ci_fields(self):
+        records = self._records_with_metric(
+            "task_completion",
+            [(f"1.1.{i}", float(i) / 10) for i in range(20)],
+        )
+        agg = MetricsRunner._build_per_metric_aggregates(
+            records, ["task_completion"], pass_at_k_results=None, num_draws=1
+        )
+        entry = agg["task_completion"]
+        assert "mean_ci_lower" in entry
+        assert "mean_ci_upper" in entry
+        assert "mean_ci_n_scenarios" in entry
+        assert entry["mean_ci_lower"] <= entry["mean"] <= entry["mean_ci_upper"]
+        # n_scenarios == count for k=1
+        assert entry["mean_ci_n_scenarios"] == entry["count"]
+
+    def test_per_metric_no_valid_records_emits_null_ci(self):
+        records = self._records_with_metric(
+            "task_completion",
+            [("1.1.1", None), ("1.1.2", None)],
+        )
+        agg = MetricsRunner._build_per_metric_aggregates(
+            records, ["task_completion"], pass_at_k_results=None, num_draws=1
+        )
+        entry = agg["task_completion"]
+        assert entry["mean_ci_lower"] is None
+        assert entry["mean_ci_upper"] is None
+        assert entry["mean_ci_n_scenarios"] == 0
+
+    def test_per_metric_pass_k_ci_fields(self):
+        # Build per-scenario PassAtKResult fixtures and confirm pass_k CI fields appear.
+        records = {}
+        for sid in range(10):
+            for trial in range(3):
+                m = MetricScore(
+                    name="task_completion", score=1.0 if trial < 2 else 0.0, normalized_score=1.0 if trial < 2 else 0.0
+                )
+                records[f"1.1.{sid}/trial_{trial}"] = RecordMetrics(
+                    record_id=f"1.1.{sid}/trial_{trial}",
+                    metrics={"task_completion": m},
+                )
+        pass_at_k_results = {
+            f"1.1.{sid}": {
+                "task_completion": PassAtKResult(
+                    metric_name="task_completion",
+                    n=3,
+                    k=3,
+                    c=2,
+                    pass_at_k=1.0,
+                    pass_power_k=0.0,
+                    threshold=0.5,
+                )
+            }
+            for sid in range(10)
+        }
+        agg = MetricsRunner._build_per_metric_aggregates(
+            records, ["task_completion"], pass_at_k_results=pass_at_k_results, num_draws=3
+        )
+        block = agg["task_completion"]["pass_k"]
+        for stat in ["pass_at_1", "pass_at_k", "pass_power_k_observed"]:
+            assert f"{stat}_ci_lower" in block
+            assert f"{stat}_ci_upper" in block
+
+
+class TestRunSeedIntegration:
+    def _make_clean_records(self, n: int, passing: int):
+        records = {}
+        for i in range(n):
+            is_pass = i < passing
+            r = make_record_metrics(
+                {
+                    "task_completion": 1.0 if is_pass else 0.0,
+                    "faithfulness": 0.5,
+                    "agent_speech_fidelity": 0.95,
+                    "conversation_progression": 0.5,
+                    "turn_taking": 0.8,
+                    "conciseness": 0.5,
+                },
+                record_id=f"1.1.{i}",
+            )
+            r.aggregate_metrics = compute_record_aggregates(r)
+            records[f"1.1.{i}"] = r
+        return records
+
+    def test_within_run_byte_identical(self):
+        records = self._make_clean_records(n=20, passing=10)
+        seed = run_seed("2026-04-16_18-55-44.848147_gpt-realtime-1.5")
+        a = compute_run_level_aggregates(records, seed=seed)
+        b = compute_run_level_aggregates(records, seed=seed)
+        assert a == b
+
+    def test_across_run_independence(self):
+        records = self._make_clean_records(n=20, passing=10)
+        # Seed strings chosen empirically: the bimodal n=20 fixture gives a low-variance
+        # bootstrap distribution where many seed pairs land on identical percentile bounds.
+        # The "x"/"y" pair produces differing CI bounds for both EVA-A_pass and EVA-A_mean.
+        seed_a = run_seed("x")
+        seed_b = run_seed("y")
+        a = compute_run_level_aggregates(records, seed=seed_a)
+        b = compute_run_level_aggregates(records, seed=seed_b)
+        # Point estimates are identical (same data); CI bounds differ (different MC noise).
+        for comp_name in ["EVA-A_pass", "EVA-A_mean"]:
+            assert a[comp_name]["mean"] == b[comp_name]["mean"]
+            # At least one of (lower, upper) must differ across runs.
+            assert (
+                a[comp_name]["mean_ci_lower"] != b[comp_name]["mean_ci_lower"]
+                or a[comp_name]["mean_ci_upper"] != b[comp_name]["mean_ci_upper"]
+            )
+
+    def test_per_metric_seed_propagation(self):
+        # The seed kwarg added in Task 5 to _build_per_metric_aggregates must actually
+        # change the CI bounds; same data + same seed must be deterministic.
+        records = {}
+        for i in range(20):
+            value = float(i) / 20.0
+            m = MetricScore(name="task_completion", score=value, normalized_score=value)
+            records[f"1.1.{i}"] = RecordMetrics(record_id=f"1.1.{i}", metrics={"task_completion": m})
+
+        seed_a = run_seed("run-a")
+        seed_b = run_seed("run-b")
+
+        agg_a1 = MetricsRunner._build_per_metric_aggregates(
+            records, ["task_completion"], pass_at_k_results=None, num_draws=1, seed=seed_a
+        )
+        agg_a2 = MetricsRunner._build_per_metric_aggregates(
+            records, ["task_completion"], pass_at_k_results=None, num_draws=1, seed=seed_a
+        )
+        agg_b = MetricsRunner._build_per_metric_aggregates(
+            records, ["task_completion"], pass_at_k_results=None, num_draws=1, seed=seed_b
+        )
+
+        # Same seed → byte-identical
+        assert agg_a1["task_completion"] == agg_a2["task_completion"]
+        # Different seed → at least one bound differs. The n=20 continuous-value fixture
+        # produces enough bootstrap variance for bounds to differ across seeds.
+        entry_a = agg_a1["task_completion"]
+        entry_b = agg_b["task_completion"]
+        assert entry_a["mean"] == entry_b["mean"]
+        assert (
+            entry_a["mean_ci_lower"] != entry_b["mean_ci_lower"] or entry_a["mean_ci_upper"] != entry_b["mean_ci_upper"]
         )
