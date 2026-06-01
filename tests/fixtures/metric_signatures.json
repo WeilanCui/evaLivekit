@@ -91,7 +91,7 @@
   },
   "UserBehavioralFidelityMetric": {
     "name": "user_behavioral_fidelity",
-    "prompt_hash": "4e4886a8d4a4",
+    "prompt_hash": "e2fc0a863591",
     "source_hash": "c1c200d0fdcb",
     "version": "v0.1"
   },
