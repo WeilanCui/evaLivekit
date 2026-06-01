@@ -40,6 +40,8 @@ from pipecat.services.openai.stt import OpenAISTTService
 from pipecat.services.openai.tts import OpenAITTSService
 from pipecat.services.stt_service import STTService
 from pipecat.services.tts_service import TTSService
+from pipecat.services.xai.stt import XAISTTService
+from pipecat.services.xai.tts import XAITTSService
 from pipecat.transcriptions.language import Language
 from pipecat.utils.text.base_text_filter import BaseTextFilter
 from websockets.asyncio.client import connect as websocket_connect
@@ -220,9 +222,16 @@ def create_stt_service(
             stt_service._settings.language = params.get("language")
         return stt_service
 
+    elif model_lower == "xai":
+        logger.info("Using xAI STT")
+        return XAISTTService(
+            api_key=api_key,
+            sample_rate=SAMPLE_RATE,
+        )
+
     else:
         raise ValueError(
-            f"Unknown STT model: {model}. Available: assemblyai, cartesia, cohere, deepgram, deepgram-flux, elevenlabs, nvidia, nvidia-baseten, openai"
+            f"Unknown STT model: {model}. Available: assemblyai, cartesia, cohere, deepgram, deepgram-flux, elevenlabs, nvidia, nvidia-baseten, openai, xai"
         )
 
 
@@ -383,6 +392,17 @@ def create_tts_service(
         voxtral_tts._settings.language = language_code
         return voxtral_tts
 
+    elif model_lower == "xai":
+        logger.info(f"Using xAI TTS: voice={params.get('voice', 'eve')}")
+        return XAITTSService(
+            api_key=api_key,
+            sample_rate=SAMPLE_RATE,
+            settings=XAITTSService.Settings(
+                voice=params.get("voice", "eve"),
+                language=language_code,
+            ),
+        )
+
     elif model_lower == "xtts":
         logger.info(f"Using XTTS TTS: {params['model']}")
         xtts_tts = OpenAITTSService(
@@ -403,7 +423,7 @@ def create_tts_service(
 
     else:
         raise ValueError(
-            f"Unknown TTS model: {model}. Available: cartesia, chatterbox, deepgram, elevenlabs, gemini, kokoro, nvidia-baseten, openai, xtts"
+            f"Unknown TTS model: {model}. Available: cartesia, chatterbox, deepgram, elevenlabs, gemini, kokoro, nvidia-baseten, openai, xai, xtts"
         )
 
 
