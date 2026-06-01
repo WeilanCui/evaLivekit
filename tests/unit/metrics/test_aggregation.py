@@ -580,6 +580,7 @@ class TestRunLevelPassKCIs:
 class TestPerMetricCIs:
     def _records_with_metric(self, name: str, values: list[tuple[str, float | None]]):
         """Build a dict[record_id, RecordMetrics] from (record_id, value) pairs.
+
         ``None`` value means the metric is errored for that record.
         """
         out = {}
