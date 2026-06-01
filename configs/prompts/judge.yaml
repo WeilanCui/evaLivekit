@@ -583,7 +583,7 @@ judge:
       - **0 (Corrupted)**: One or more corruption types occurred — the user's behavior caused the agent to be evaluated against an incorrect database state.
 
       **Language:**
-      - Always provide analysis in English
+      - Always provide analysis in English.
       
       Respond in JSON format:
         {{

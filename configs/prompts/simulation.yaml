@@ -30,10 +30,10 @@ agent:
     ### Clarity When Spoken Aloud
     - Spell out acronyms and abbreviations in full (say "as soon as possible" not "ASAP", "by the way" not "BTW")
     - Express numbers in linguistically/culturally appropriate spoken form for the conversation language:
-      * Dates: spoken form matching local convention (e.g. English: "January 15th, 2024"; French: "le quinze janvier deux mille vingt-quatre") not "1/15/2024"
-      * Times: spoken form (e.g. English: "three thirty PM"; German: "fünfzehn Uhr dreißig") not "3:30 PM"
-      * Quantities: spoken form (e.g. English: "twenty dollars"; Korean: "이십 달러") not "$20"
-      * Years: spoken form appropriate to the language, not "2024"
+      * Dates: spoken form matching local convention (e.g. English: "January 15th, 2024"; French: "le quinze janvier deux mille vingt-quatre"; not "1/15/2024")
+      * Times: spoken form (e.g. English: "three thirty PM"; German: "fünfzehn Uhr dreißig"; not "3:30 PM")
+      * Quantities: spoken form (e.g. English: "twenty dollars"; Korean: "이십 달러"; not "$20")
+      * Years: spoken form appropriate to the language (e.g. English: "twenty twenty-four"; not "2024")
     - Avoid ambiguous shorthand like "w/" (say "with"), "info" (say "information")
     
     ### Audio-Appropriate Content
@@ -88,10 +88,10 @@ audio_llm_agent:
     ### Clarity When Spoken Aloud
     - Spell out acronyms and abbreviations in full (say "as soon as possible" not "ASAP", "by the way" not "BTW")
     - Express numbers in linguistically/culturally appropriate spoken form for the conversation language:
-      * Dates: spoken form matching local convention (e.g. English: "January 15th, 2024"; French: "le quinze janvier deux mille vingt-quatre") not "1/15/2024"
-      * Times: spoken form (e.g. English: "three thirty PM"; German: "fünfzehn Uhr dreißig") not "3:30 PM"
-      * Quantities: spoken form (e.g. English: "twenty dollars"; Korean: "이십 달러") not "$20"
-      * Years: spoken form appropriate to the language, not "2024"
+      * Dates: spoken form matching local convention (e.g. English: "January 15th, 2024"; French: "le quinze janvier deux mille vingt-quatre"; not "1/15/2024")
+      * Times: spoken form (e.g. English: "three thirty PM"; German: "fünfzehn Uhr dreißig"; not "3:30 PM")
+      * Quantities: spoken form (e.g. English: "twenty dollars"; Korean: "이십 달러"; not "$20")
+      * Years: spoken form appropriate to the language (e.g. English: "twenty twenty-four"; not "2024")
     - Avoid ambiguous shorthand like "w/" (say "with"), "info" (say "information")
     
     ### Audio-Appropriate Content
@@ -151,10 +151,10 @@ realtime_agent:
     ### Clarity When Spoken Aloud
     - Spell out acronyms and abbreviations in full (say "as soon as possible" not "ASAP", "by the way" not "BTW")
     - Express numbers in linguistically/culturally appropriate spoken form for the conversation language:
-      * Dates: spoken form matching local convention (e.g. English: "January 15th, 2024"; French: "le quinze janvier deux mille vingt-quatre") not "1/15/2024"
-      * Times: spoken form (e.g. English: "three thirty PM"; German: "fünfzehn Uhr dreißig") not "3:30 PM"
-      * Quantities: spoken form (e.g. English: "twenty dollars"; Korean: "이십 달러") not "$20"
-      * Years: spoken form appropriate to the language, not "2024"
+      * Dates: spoken form matching local convention (e.g. English: "January 15th, 2024"; French: "le quinze janvier deux mille vingt-quatre"; not "1/15/2024")
+      * Times: spoken form (e.g. English: "three thirty PM"; German: "fünfzehn Uhr dreißig"; not "3:30 PM")
+      * Quantities: spoken form (e.g. English: "twenty dollars"; Korean: "이십 달러"; not "$20")
+      * Years: spoken form appropriate to the language ("twenty twenty-four" not "2024")
     - Avoid ambiguous shorthand like "w/" (say "with"), "info" (say "information")
     
     ### Audio-Appropriate Content

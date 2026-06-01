@@ -345,15 +345,24 @@ def create_tts_service(
             voice=params.get("voice", "alloy"),
             base_url=url,
         )
+        # Kokoro sometimes accepts the 2 char codes, and sometimes doesn't
+        # reference codes: https://github.com/hexgrad/kokoro/blob/main/kokoro/pipeline.py
+        supported = ["en-us", "en-gb", "es", "fr-fr", "hi", "it", "pt-br", "ja", "zh"]
+        if language_code not in supported:
+            logger.warning(f"Language code {language_code} not supported by Kokoro, trying to convert to 4 char code")
+            two_to_four = {"en": "en-us", "fr": "fr-fr", "pt": "pt-br"}
+            language_code = two_to_four.get(language_code, language_code)
+            if language_code not in supported:
+                raise ValueError(f"Language code {language_code} not supported by Kokoro")
         kokoro_tts._eva_extra_body = {
             "stream": True,
             "streaming_quality": "fast",
             "streaming_strategy": "word",
             "streaming_chunk_size": 80,
             "streaming_buffer_size": 1,
+            "lang_code": language_code,
         }
         OpenAITTSService.run_tts = override_run_tts
-        kokoro_tts._settings.language = language_code
         return kokoro_tts
 
     elif model_lower == "nvidia-baseten":

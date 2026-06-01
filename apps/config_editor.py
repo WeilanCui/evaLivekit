@@ -12,6 +12,7 @@ prefill values and written on save.
 
 from __future__ import annotations
 
+import hashlib
 import html as html_module
 import json
 import sys
@@ -220,9 +221,10 @@ def _enum_options_for(var: AnnotatedVar) -> list[str]:
 
 def _render_json_object(name: str, info: str, current: dict) -> None:
     st.markdown(f"**{name}**" + (f" — {info}" if info else ""))
-    raw_key = f"raw_{name}"
-    if raw_key not in st.session_state:
-        st.session_state[raw_key] = json.dumps(current, indent=2) if current else ""
+
+    # Both widgets are keyed by a hash of the current value so they always
+    # re-initialize from field_values after any write + rerun.
+    val_hash = hashlib.md5(json.dumps(current, sort_keys=True).encode()).hexdigest()[:8]
 
     rows = [{"key": k, "value": _scalar_to_str(v)} for k, v in current.items()] or [{"key": "", "value": ""}]
     edited = st.data_editor(
@@ -233,25 +235,34 @@ def _render_json_object(name: str, info: str, current: dict) -> None:
             "key": st.column_config.TextColumn("key", required=False),
             "value": st.column_config.TextColumn("value", required=False),
         },
-        key=f"de_{name}",
+        key=f"_de_{name}_{val_hash}",
     )
-    parsed_kv: dict[str, Any] = {}
-    for row in edited:
-        k = (row.get("key") or "").strip()
-        if k:
-            parsed_kv[k] = _str_to_scalar(row.get("value"))
+    parsed_from_table: dict[str, Any] = {
+        (r.get("key") or "").strip(): _str_to_scalar(r.get("value")) for r in edited if (r.get("key") or "").strip()
+    }
+
+    if json.dumps(parsed_from_table, sort_keys=True) != json.dumps(current, sort_keys=True):
+        st.session_state.field_values[name] = parsed_from_table
+        st.rerun()
 
     with st.expander("Raw JSON", expanded=False):
         text = st.text_area(
-            "Edit as JSON", value=json.dumps(parsed_kv, indent=2) if parsed_kv else "", key=raw_key, height=140
+            "Edit as JSON",
+            value=json.dumps(current, indent=2) if current else "",
+            key=f"_rawtxt_{name}_{val_hash}",
+            height=140,
         )
-        if text.strip():
-            try:
-                parsed_kv = json.loads(text)
-            except json.JSONDecodeError as e:
-                st.warning(f"Invalid JSON: {e}")
 
-    st.session_state.field_values[name] = parsed_kv
+    if text.strip():
+        try:
+            parsed_kv = json.loads(text)
+            if json.dumps(parsed_kv, sort_keys=True) != json.dumps(current, sort_keys=True):
+                st.session_state.field_values[name] = parsed_kv
+                st.rerun()
+        except json.JSONDecodeError as e:
+            st.warning(f"Invalid JSON: {e}")
+
+    st.session_state.field_values[name] = current
 
 
 def _scalar_to_str(v: Any) -> str:

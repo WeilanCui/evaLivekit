@@ -436,6 +436,7 @@ async def add_scenario_aliases(
             to_add = [a for a in new_aliases if a not in existing]
             if to_add:
                 entry["name_aliases"].extend(to_add)
+                entry["name_aliases"].sort()
                 changed = True
 
         if not changed:
@@ -470,6 +471,7 @@ async def add_scenario_aliases(
                 to_add = [a for a in new_aliases if a not in existing]
                 if to_add:
                     entry["name_aliases"].extend(to_add)
+                    entry["name_aliases"].sort()
                     dataset_changed = True
 
         if dataset_changed:
