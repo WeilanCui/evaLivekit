@@ -226,7 +226,13 @@ def create_stt_service(
         logger.info("Using xAI STT")
         return XAISTTService(
             api_key=api_key,
-            sample_rate=SAMPLE_RATE,
+            sample_rate=params.get("sample_rate", 16000),
+            encoding=params.get("encoding", "pcm"),
+            settings=XAISTTService.Settings(
+                language=language_code,
+                interim_results=params.get("interim_results", True),
+                endpointing=params.get("endpointing", 200),
+            ),
         )
 
     else:
@@ -394,14 +400,28 @@ def create_tts_service(
 
     elif model_lower == "xai":
         logger.info(f"Using xAI TTS: voice={params.get('voice', 'eve')}")
-        return XAITTSService(
+        # Lowest-latency defaults: pcm codec, optimize_streaming_latency=2,
+        # text_normalization=false.  Monkey-patch _build_url to inject the
+        # extra query params that pipecat's XAITTSService doesn't expose yet.
+        xai_tts = XAITTSService(
             api_key=api_key,
-            sample_rate=SAMPLE_RATE,
+            sample_rate=params.get("sample_rate", SAMPLE_RATE),
+            codec=params.get("codec", "pcm"),
             settings=XAITTSService.Settings(
                 voice=params.get("voice", "eve"),
                 language=language_code,
             ),
         )
+        _orig_build_url = xai_tts._build_url
+        extra_qs = (
+            f"&optimize_streaming_latency={params.get('optimize_streaming_latency', 2)}"
+            f"&text_normalization={str(params.get('text_normalization', False)).lower()}"
+        )
+        speed = params.get("speed")
+        if speed is not None:
+            extra_qs += f"&speed={speed}"
+        xai_tts._build_url = lambda: _orig_build_url() + extra_qs
+        return xai_tts
 
     elif model_lower == "xtts":
         logger.info(f"Using XTTS TTS: {params['model']}")
