@@ -32,6 +32,10 @@
       1,
       "er"
     ],
+    "unième": [
+      1,
+      "ème"
+    ],
     "première": [
       1,
       "ère"
@@ -204,7 +208,8 @@
   "split_hyphenated_numbers": true,
   "vigesimal_trigger_words": [
     "vingt",
-    "vingts"
+    "vingts",
+    "vingtième"
   ],
   "vigesimal_multiplier": 20,
   "vigesimal_residuals": [

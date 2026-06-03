@@ -147,6 +147,9 @@ class GenericNumberNormalizer:
         self.prefixes = set(list(self.preceding_prefixers.values()) + list(self.following_prefixers.values()))
         self.suffixers = {strip(k): v for k, v in config.suffixers.items()}
         self.repeat_words = _strip_dict(config.repeat_words)
+        # Trigger words may carry accents (e.g. "vingtième"); the tokens reaching
+        # process_words are already accent-stripped, so strip these to match.
+        self.vigesimal_trigger_words = {strip(w) for w in config.vigesimal_trigger_words}
         self.decimals = {*self.cardinals, *self.tens, *self.zeros}
 
         self.specials: set[str] = set()
@@ -302,7 +305,7 @@ class GenericNumberNormalizer:
             elif current in self.tens:
                 tens = self.tens[current]
                 if (
-                    current in self.config.vigesimal_trigger_words
+                    current in self.vigesimal_trigger_words
                     and isinstance(value, int)
                     and value % 100 in self.config.vigesimal_residuals
                 ):
@@ -320,7 +323,15 @@ class GenericNumberNormalizer:
                         value = str(value) + str(tens)
             elif current in self.tens_suffixed:
                 tens, suffix = self.tens_suffixed[current]
-                if value is None:
+                if (
+                    current in self.vigesimal_trigger_words
+                    and isinstance(value, int)
+                    and value % 100 in self.config.vigesimal_residuals
+                ):
+                    base = (value // 100) * 100
+                    digit = value % 100
+                    yield output(str(base + digit * self.config.vigesimal_multiplier) + suffix)
+                elif value is None:
                     yield output(str(tens) + suffix)
                 elif isinstance(value, str):
                     yield output(str(value) + str(tens) + suffix)
