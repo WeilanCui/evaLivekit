@@ -916,17 +916,10 @@ Return these dicts under "vocabulary":
         dix    → 80 in additive_teen_residuals: value = 80 + 10 = 90
         neuf   → value % 10 == 0: value = 90 + 9 = 99  ✓
 
-=== STEP 5: test cases ===
-
-Return "test_cases" as a list of 15 [spelled_form, digit_form] pairs that exercise:
-  small (1-9), teens, tens, 21/22 (the units-before-tens edge if applicable),
-  100, 121, 1000, 1500, a decimal, and any language-specific quirk.
-  Example: ["twenty two", "22"], ["one hundred and one", "101"].
-
 === OUTPUT FORMAT ===
 
 Return one JSON object with keys: family, vocabulary, conjunction_word,
-decimal_word, split_hyphenated_numbers, vigesimal, test_cases. Optionally a
+decimal_word, split_hyphenated_numbers, vigesimal. Optionally a
 "reason" field. No markdown, no commentary.
 
 Reminder on vocabulary shape:
@@ -936,6 +929,20 @@ Reminder on vocabulary shape:
   "tens": {{...}}, "tens_suffixed": {{...}},
   "scaling_units": {{...}}, "scaling_units_suffixed": {{...}}
 }}"""
+
+
+_WER_TEST_CASES_PROMPT = """Generate 15 number round-trip test cases for {language_name} (BCP-47: {language}).
+
+Each test case is a [spelled_form, digit_form] pair where spelled_form is how a speaker
+of {language_name} would say the number out loud, and digit_form is the numeric string it
+represents.
+
+Cover: small numbers (1-9), teens, tens, a compound like 21 or 22, 100, 121, 1000, 1500,
+a decimal number, and at least one language-specific quirk (e.g. vigesimal forms in French,
+reversed units in German, long scale in some European languages).
+
+Return JSON: {{"test_cases": [["spelled_form", "digit_form"], ...]}}
+No markdown, no commentary."""
 
 
 _WER_RETRY_PROMPT = """The config you generated has {fail_count} failing round-trip test(s):
@@ -1156,9 +1163,15 @@ async def _generate_wer_config(
          pass rate. Write the config regardless so the user has a starting point.
     """
     prompt = _WER_PROMPT.format(language_name=language_name, language=language)
+    test_cases_prompt = _WER_TEST_CASES_PROMPT.format(language_name=language_name, language=language)
     messages: list[dict] = [{"role": "user", "content": prompt}]
-    text, _ = await llm.generate_text(messages, response_format={"type": "json_object"})
+    (text, _), (test_cases_text, _) = await asyncio.gather(
+        llm.generate_text(messages, response_format={"type": "json_object"}),
+        llm.generate_text([{"role": "user", "content": test_cases_prompt}], response_format={"type": "json_object"}),
+    )
     llm_data = extract_and_load_json(text)
+    test_cases_data = extract_and_load_json(test_cases_text)
+    llm_data["test_cases"] = test_cases_data.get("test_cases") or []
 
     family = llm_data.get("family")
     if family in {"cjk", "unsupported"}:
