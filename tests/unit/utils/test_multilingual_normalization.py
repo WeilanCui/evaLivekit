@@ -73,8 +73,10 @@ class TestFrenchNumbers:
     def test_ordinal_diacritics_recognized(self):
         # Ordinals containing diacritics (deuxième, centième …) are looked up
         # against the vocabulary in their accent-stripped form, so they
-        # successfully resolve to the digit+suffix output (e.g. "2ème").
-        assert normalize_text("deuxième", Language.FR.value) == normalize_text("2ème", Language.FR.value)
+        # successfully resolve to the digit+suffix output (e.g. "2e").
+        assert normalize_text("deuxième", Language.FR.value) == normalize_text("2e", Language.FR.value)
+        # "2ème" and "2eme" are common misspellings; after diacritic-stripping
+        # they both reduce to "2eme" which does not match "2e", so they stay as-is.
         assert normalize_text("2ème", Language.FR.value) == normalize_text("2eme", Language.FR.value)
 
 

@@ -34,7 +34,7 @@
     ],
     "unième": [
       1,
-      "ème"
+      "e"
     ],
     "première": [
       1,
@@ -50,75 +50,75 @@
     ],
     "deuxième": [
       2,
-      "ème"
+      "e"
     ],
     "troisième": [
       3,
-      "ème"
+      "e"
     ],
     "quatrième": [
       4,
-      "ème"
+      "e"
     ],
     "cinquième": [
       5,
-      "ème"
+      "e"
     ],
     "sixième": [
       6,
-      "ème"
+      "e"
     ],
     "septième": [
       7,
-      "ème"
+      "e"
     ],
     "huitième": [
       8,
-      "ème"
+      "e"
     ],
     "neuvième": [
       9,
-      "ème"
+      "e"
     ],
     "dixième": [
       10,
-      "ème"
+      "e"
     ],
     "onzième": [
       11,
-      "ème"
+      "e"
     ],
     "douzième": [
       12,
-      "ème"
+      "e"
     ],
     "treizième": [
       13,
-      "ème"
+      "e"
     ],
     "quatorzième": [
       14,
-      "ème"
+      "e"
     ],
     "quinzième": [
       15,
-      "ème"
+      "e"
     ],
     "seizième": [
       16,
-      "ème"
+      "e"
     ],
     "dix-septième": [
       17,
-      "ème"
+      "e"
     ],
     "dix-huitième": [
       18,
-      "ème"
+      "e"
     ],
     "dix-neuvième": [
       19,
-      "ème"
+      "e"
     ]
   },
   "tens": {
@@ -132,39 +132,39 @@
   "tens_suffixed": {
     "vingtième": [
       20,
-      "ème"
+      "e"
     ],
     "trentième": [
       30,
-      "ème"
+      "e"
     ],
     "quarantième": [
       40,
-      "ème"
+      "e"
     ],
     "cinquantième": [
       50,
-      "ème"
+      "e"
     ],
     "soixantième": [
       60,
-      "ème"
+      "e"
     ],
     "septantième": [
       70,
-      "ème"
+      "e"
     ],
     "huitantième": [
       80,
-      "ème"
+      "e"
     ],
     "octantième": [
       80,
-      "ème"
+      "e"
     ],
     "nonantième": [
       90,
-      "ème"
+      "e"
     ]
   },
   "scaling_units": {
@@ -183,23 +183,23 @@
   "scaling_units_suffixed": {
     "centième": [
       100,
-      "ème"
+      "e"
     ],
     "millième": [
       1000,
-      "ème"
+      "e"
     ],
     "millionième": [
       1000000,
-      "ème"
+      "e"
     ],
     "milliardième": [
       1000000000,
-      "ème"
+      "e"
     ],
     "billionième": [
       1000000000000,
-      "ème"
+      "e"
     ]
   },
   "conjunction_word": "et",
