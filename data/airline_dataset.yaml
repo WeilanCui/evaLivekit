@@ -486,7 +486,7 @@ culture_overrides:
   fr-CA:
     first_name: Maude
     last_name: Tremblay
-    phone: +1 194 127 7095
+    phone: +1 194 127-7095
   fr:
     first_name: Sophie
     last_name: Lefebvre
@@ -1014,7 +1014,7 @@ culture_overrides:
   fr-CA:
     first_name: David
     last_name: Poulin
-    phone: +1 021 087 6783
+    phone: +1 021 087-6783
   fr:
     first_name: Romain
     last_name: Garcia
@@ -1543,7 +1543,7 @@ culture_overrides:
   fr-CA:
     first_name: France
     last_name: Morin
-    phone: +1 026 837 8567
+    phone: +1 026 837-8567
   fr:
     first_name: Audrey
     last_name: Laurent
@@ -2325,7 +2325,7 @@ culture_overrides:
   fr-CA:
     first_name: Mario
     last_name: Lefebvre
-    phone: +1 135 573 9651
+    phone: +1 135 573-9651
   fr:
     first_name: Philippe
     last_name: Rousseau
@@ -2922,7 +2922,7 @@ culture_overrides:
   fr-CA:
     first_name: Jacques
     last_name: Dion
-    phone: +1 079 797 8992
+    phone: +1 079 797-8992
   fr:
     first_name: Guillaume
     last_name: David
@@ -3358,7 +3358,7 @@ culture_overrides:
   fr-CA:
     first_name: Sophie
     last_name: Paquette
-    phone: +1 371 011 4844
+    phone: +1 371 011-4844
   fr:
     first_name: Pauline
     last_name: Bertrand
@@ -3967,7 +3967,7 @@ culture_overrides:
   fr-CA:
     first_name: Alain
     last_name: Boucher
-    phone: +1 835 956 2073
+    phone: +1 835 956-2073
   fr:
     first_name: Alexandre
     last_name: Mercier
@@ -4576,7 +4576,7 @@ culture_overrides:
   fr-CA:
     first_name: Johanne
     last_name: Parent
-    phone: +1 828 329 5279
+    phone: +1 828 329-5279
   fr:
     first_name: Nathalie
     last_name: Dupont
@@ -5252,7 +5252,7 @@ culture_overrides:
   fr-CA:
     first_name: Raymond
     last_name: Leclerc
-    phone: +1 832 100 9960
+    phone: +1 832 100-9960
   fr:
     first_name: Florian
     last_name: Lefebvre
@@ -5813,7 +5813,7 @@ culture_overrides:
   fr-CA:
     first_name: Claude
     last_name: Dufour
-    phone: +1 907 596 2591
+    phone: +1 907 596-2591
   fr:
     first_name: Lucas
     last_name: Roux
@@ -6332,7 +6332,7 @@ culture_overrides:
   fr-CA:
     first_name: Élise
     last_name: Paquette
-    phone: +1 592 359 1753
+    phone: +1 592 359-1753
   fr:
     first_name: Claire
     last_name: Henry
@@ -6739,7 +6739,7 @@ culture_overrides:
   fr-CA:
     first_name: Amelie
     last_name: Lemieux
-    phone: +1 700 639 0708
+    phone: +1 700 639-0708
   fr:
     first_name: Emilie
     last_name: Morel
@@ -7295,7 +7295,7 @@ culture_overrides:
   fr-CA:
     first_name: Micheline
     last_name: Bouchard
-    phone: +1 916 011 8495
+    phone: +1 916 011-8495
   fr:
     first_name: Valérie
     last_name: André
@@ -7919,7 +7919,7 @@ culture_overrides:
   fr-CA:
     first_name: Audrey
     last_name: Dufour
-    phone: +1 519 239 6106
+    phone: +1 519 239-6106
   fr:
     first_name: Jeanne
     last_name: David
@@ -8457,7 +8457,7 @@ culture_overrides:
   fr-CA:
     first_name: Marie
     last_name: Parent
-    phone: +1 488 877 2414
+    phone: +1 488 877-2414
   fr:
     first_name: Camille
     last_name: Nicolas
@@ -9048,7 +9048,7 @@ culture_overrides:
   fr-CA:
     first_name: Nicole
     last_name: Lemieux
-    phone: +1 227 464 3763
+    phone: +1 227 464-3763
   fr:
     first_name: Lea
     last_name: Guerin
@@ -9495,7 +9495,7 @@ culture_overrides:
   fr-CA:
     first_name: Nathalie
     last_name: Desjardins
-    phone: +1 959 369 4424
+    phone: +1 959 369-4424
   fr:
     first_name: Catherine
     last_name: Dupont
@@ -10065,7 +10065,7 @@ culture_overrides:
   fr-CA:
     first_name: Michel
     last_name: Dubois
-    phone: +1 081 807 8714
+    phone: +1 081 807-8714
   fr:
     first_name: Lucas
     last_name: Robert
@@ -10503,7 +10503,7 @@ culture_overrides:
   fr-CA:
     first_name: Isabelle
     last_name: Leblanc
-    phone: +1 051 836 4772
+    phone: +1 051 836-4772
   fr:
     first_name: Justine
     last_name: Bonnet
@@ -10940,7 +10940,7 @@ culture_overrides:
   fr-CA:
     first_name: Mathieu
     last_name: Caron
-    phone: +1 050 255 7706
+    phone: +1 050 255-7706
   fr:
     first_name: Arnaud
     last_name: Richard
@@ -11958,7 +11958,7 @@ culture_overrides:
   fr-CA:
     first_name: Robert
     last_name: Mercier
-    phone: +1 735 544 3223
+    phone: +1 735 544-3223
   fr:
     first_name: Raphael
     last_name: Laurent
@@ -12632,7 +12632,7 @@ culture_overrides:
   fr-CA:
     first_name: Chantal
     last_name: Leblanc
-    phone: +1 171 567 5644
+    phone: +1 171 567-5644
   fr:
     first_name: Aurélie
     last_name: Simon
@@ -13063,7 +13063,7 @@ culture_overrides:
   fr-CA:
     first_name: Gilles
     last_name: Leblanc
-    phone: +1 325 403 7732
+    phone: +1 325 403-7732
   fr:
     first_name: Alexandre
     last_name: Leroy
@@ -13465,7 +13465,7 @@ culture_overrides:
   fr-CA:
     first_name: Paul
     last_name: Gauthier
-    phone: +1 959 539 6158
+    phone: +1 959 539-6158
   fr:
     first_name: Jérôme
     last_name: Girard
@@ -13901,7 +13901,7 @@ culture_overrides:
   fr-CA:
     first_name: Denis
     last_name: Belanger
-    phone: +1 825 173 5413
+    phone: +1 825 173-5413
   fr:
     first_name: Damien
     last_name: Nicolas
@@ -14320,7 +14320,7 @@ culture_overrides:
   fr-CA:
     first_name: Andre
     last_name: Paquette
-    phone: +1 207 756 3133
+    phone: +1 207 756-3133
   fr:
     first_name: Guillaume
     last_name: Garnier
@@ -14729,7 +14729,7 @@ culture_overrides:
   fr-CA:
     first_name: Diane
     last_name: Bouchard
-    phone: +1 982 673 5294
+    phone: +1 982 673-5294
   fr:
     first_name: Justine
     last_name: Bertrand
@@ -15161,7 +15161,7 @@ culture_overrides:
   fr-CA:
     first_name: Yves
     last_name: Ouellet
-    phone: +1 427 221 3266
+    phone: +1 427 221-3266
   fr:
     first_name: Philippe
     last_name: Bernard
@@ -15594,7 +15594,7 @@ culture_overrides:
   fr-CA:
     first_name: Sarah
     last_name: Gosselin
-    phone: +1 879 236 5372
+    phone: +1 879 236-5372
   fr:
     first_name: Lea
     last_name: Robert
@@ -16190,7 +16190,7 @@ culture_overrides:
   fr-CA:
     first_name: Sébastien
     last_name: Lacroix
-    phone: +1 535 168 3739
+    phone: +1 535 168-3739
   fr:
     first_name: Guillaume
     last_name: Muller
@@ -16699,7 +16699,7 @@ culture_overrides:
   fr-CA:
     first_name: Johanne
     last_name: Ouellet
-    phone: +1 987 968 1078
+    phone: +1 987 968-1078
   fr:
     first_name: Stephanie
     last_name: Lambert
@@ -17231,7 +17231,7 @@ culture_overrides:
   fr-CA:
     first_name: Louis
     last_name: Gagnon
-    phone: +1 919 648 6118
+    phone: +1 919 648-6118
   fr:
     first_name: Louis
     last_name: Bonnet
@@ -17850,7 +17850,7 @@ culture_overrides:
   fr-CA:
     first_name: Maxime
     last_name: Fournier
-    phone: +1 001 420 2177
+    phone: +1 001 420-2177
   fr:
     first_name: Alexandre
     last_name: Martinez
@@ -18439,7 +18439,7 @@ culture_overrides:
   fr-CA:
     first_name: Céline
     last_name: Lévesque
-    phone: +1 893 948 1129
+    phone: +1 893 948-1129
   fr:
     first_name: Laure
     last_name: David
@@ -19047,7 +19047,7 @@ culture_overrides:
   fr-CA:
     first_name: Claude
     last_name: Martel
-    phone: +1 718 598 3889
+    phone: +1 718 598-3889
   fr:
     first_name: Theo
     last_name: Richard
@@ -19628,7 +19628,7 @@ culture_overrides:
   fr-CA:
     first_name: Geneviève
     last_name: Lacroix
-    phone: +1 387 550 9004
+    phone: +1 387 550-9004
   fr:
     first_name: Justine
     last_name: Mercier
@@ -20181,7 +20181,7 @@ culture_overrides:
   fr-CA:
     first_name: Stéphane
     last_name: Roy
-    phone: +1 685 392 8834
+    phone: +1 685 392-8834
   fr:
     first_name: Florian
     last_name: David
@@ -20685,7 +20685,7 @@ culture_overrides:
   fr-CA:
     first_name: Gilles
     last_name: Hébert
-    phone: +1 735 610 5296
+    phone: +1 735 610-5296
   fr:
     first_name: Stéphane
     last_name: Dupont
@@ -21231,7 +21231,7 @@ culture_overrides:
   fr-CA:
     first_name: Annie
     last_name: Fournier
-    phone: +1 595 878 9949
+    phone: +1 595 878-9949
   fr:
     first_name: Justine
     last_name: Garnier
@@ -21818,7 +21818,7 @@ culture_overrides:
   fr-CA:
     first_name: Caroline
     last_name: Cloutier
-    phone: +1 438 757 7468
+    phone: +1 438 757-7468
   fr:
     first_name: Aurelie
     last_name: Fournier
@@ -22267,7 +22267,7 @@ culture_overrides:
   fr-CA:
     first_name: Denis
     last_name: Leblanc
-    phone: +1 332 860 9984
+    phone: +1 332 860-9984
   fr:
     first_name: Maxime
     last_name: Girard
@@ -22840,7 +22840,7 @@ culture_overrides:
   fr-CA:
     first_name: Denis
     last_name: Bergeron
-    phone: +1 904 160 4352
+    phone: +1 904 160-4352
   fr:
     first_name: Louis
     last_name: Martinez
@@ -23441,7 +23441,7 @@ culture_overrides:
   fr-CA:
     first_name: Maurice
     last_name: Bouchard
-    phone: +1 080 324 4111
+    phone: +1 080 324-4111
   fr:
     first_name: Thomas
     last_name: Roux
@@ -24009,7 +24009,7 @@ culture_overrides:
   fr-CA:
     first_name: Caroline
     last_name: Gagnon
-    phone: +1 907 261 4914
+    phone: +1 907 261-4914
   fr:
     first_name: Claire
     last_name: Bernard
@@ -24533,7 +24533,7 @@ culture_overrides:
   fr-CA:
     first_name: Noemie
     last_name: Parent
-    phone: +1 170 503 2991
+    phone: +1 170 503-2991
   fr:
     first_name: Charlotte
     last_name: Francois
@@ -24966,7 +24966,7 @@ culture_overrides:
   fr-CA:
     first_name: François
     last_name: Roy
-    phone: +1 078 903 6058
+    phone: +1 078 903-6058
   fr:
     first_name: Éric
     last_name: Laurent
@@ -25412,7 +25412,7 @@ culture_overrides:
   fr-CA:
     first_name: Guy
     last_name: Gosselin
-    phone: +1 376 826 6245
+    phone: +1 376 826-6245
   fr:
     first_name: Lucas
     last_name: Martinez
@@ -25853,7 +25853,7 @@ culture_overrides:
   fr-CA:
     first_name: Stephanie
     last_name: Rousseau
-    phone: +1 483 643 0099
+    phone: +1 483 643-0099
   fr:
     first_name: Valerie
     last_name: Bernard
@@ -26286,7 +26286,7 @@ culture_overrides:
   fr-CA:
     first_name: Catherine
     last_name: Lemieux
-    phone: +1 435 233 8265
+    phone: +1 435 233-8265
   fr:
     first_name: Virginie
     last_name: Girard
@@ -26479,7 +26479,7 @@ culture_overrides:
   fr-CA:
     first_name: Sylvie
     last_name: Caron
-    phone: +1 963 793 4827
+    phone: +1 963 793-4827
   fr:
     first_name: Louise
     last_name: Legrand
