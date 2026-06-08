@@ -1,4 +1,4 @@
-"""Conversation-timeout diagnostic metric."""
+"""Conversation time limit diagnostic metric."""
 
 from eva.metrics.base import CodeMetric, MetricContext
 from eva.metrics.registry import register_metric
@@ -7,11 +7,11 @@ from eva.models.results import MetricScore
 
 @register_metric
 class ConversationTimeLimitExceededMetric(CodeMetric):
-    """1.0 when the conversation finished within the time limit; 0.0 when it timed out."""
+    """1.0 when the conversation finished within the time limit; 0.0 otherwise."""
 
     name = "conversation_completed_on_time"
     version = "v0.1"
-    description = "Diagnostic metric: 1.0 when conversation finished within time limit, 0.0 on timeout"
+    description = "Diagnostic metric: 1.0 when conversation finished within time limit, 0.0 otherwise"
     category = "diagnostic"
     exclude_from_pass_at_k = True
 

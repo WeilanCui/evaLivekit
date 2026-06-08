@@ -309,7 +309,7 @@ class BenchmarkRunner:
             failed_this_attempt = not_finished_ids + failed_validation_ids
 
             for oid in not_finished_ids:
-                # Distinguish timeout from other not_finished reasons
+                # Distinguish time limit exceeded from other not_finished reasons
                 cr = result_map.get(oid)
                 hit_time_limit = cr is not None and cr.conversation_ended_reason == "time_limit_exceeded"
                 reason = "time_limit_exceeded" if hit_time_limit else "not_finished"

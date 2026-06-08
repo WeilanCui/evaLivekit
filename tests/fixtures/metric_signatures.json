@@ -38,7 +38,7 @@
   "ConversationTimeLimitExceededMetric": {
     "name": "conversation_completed_on_time",
     "prompt_hash": null,
-    "source_hash": "85c95f1e1c13",
+    "source_hash": "0628e2833ac5",
     "version": "v0.1"
   },
   "ConversationValidEndMetric": {
