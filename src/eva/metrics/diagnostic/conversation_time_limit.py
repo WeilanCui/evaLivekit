@@ -6,10 +6,10 @@ from eva.models.results import MetricScore
 
 
 @register_metric
-class ConversationTimeoutMetric(CodeMetric):
+class ConversationTimeLimitExceededMetric(CodeMetric):
     """1.0 when the conversation finished within the time limit; 0.0 when it timed out."""
 
-    name = "conversation_finished_on_time"
+    name = "conversation_completed_on_time"
     version = "v0.1"
     description = "Diagnostic metric: 1.0 when conversation finished within time limit, 0.0 on timeout"
     category = "diagnostic"
@@ -18,10 +18,10 @@ class ConversationTimeoutMetric(CodeMetric):
     async def compute(self, context: MetricContext) -> MetricScore:
         try:
             reason = context.conversation_ended_reason
-            # Note that `timeout` is treated differently from `inactivity_timeout`. `inactivity_timeout`
-            # indicates that there was a problem with the simulation whereas `timeout` indicates
+            # Note that `time_limit_exceeded` is treated differently from `inactivity_timeout`. `inactivity_timeout`
+            # indicates that there was a problem with the simulation whereas `time_limit_exceeded` indicates
             # that the model could not complete the conversation on time.
-            timed_out = reason == "timeout"
+            timed_out = reason == "time_limit_exceeded"
             score = 0.0 if timed_out else 1.0
 
             return MetricScore(

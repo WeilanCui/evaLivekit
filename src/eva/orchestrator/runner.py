@@ -161,8 +161,8 @@ class BenchmarkRunner:
         rerun_history: dict[str, list[dict]] = {}
         timeout_attempt_counts: dict[str, int] = {}
         timeout_validation_cache: dict[str, dict[int, ValidationResult]] = {}
-        max_timeout_attempts = int(self.config.validation_thresholds.get("max_timeout_attempts", 1))
-        timeout_accepted_ids: set[str] = set()
+        max_time_limit_attempts = int(self.config.validation_thresholds.get("max_time_limit_attempts", 1))
+        time_limit_accepted_ids: set[str] = set()
         started_at = datetime.now()
 
         # Initialize port pool once before the attempt loop.
@@ -328,13 +328,13 @@ class BenchmarkRunner:
                 rerun_history.setdefault(oid, []).append(entry)
 
             # Check for timeout-accepted records: records that have timed out
-            # max_timeout_attempts times get evaluated with gate bypass.
+            # max_time_limit_attempts times get evaluated with gate bypass.
             # The current attempt was already validated eagerly above; if it passes,
             # accept immediately. Otherwise, scan cached results from previous
             # timeout attempts and restore the archived directory if one passes.
-            newly_timeout_accepted: list[str] = []
+            newly_time_limit_accepted: list[str] = []
             for oid in list(failed_this_attempt):
-                if timeout_attempt_counts.get(oid, 0) < max_timeout_attempts:
+                if timeout_attempt_counts.get(oid, 0) < max_time_limit_attempts:
                     continue
 
                 cached = timeout_validation_cache.get(oid, {})
@@ -349,7 +349,7 @@ class BenchmarkRunner:
                         oid,
                         failed_this_attempt,
                         finished_ids,
-                        newly_timeout_accepted,
+                        newly_time_limit_accepted,
                         metrics_runner,
                         metrics_background_tasks,
                     )
@@ -380,7 +380,7 @@ class BenchmarkRunner:
                                 oid,
                                 failed_this_attempt,
                                 finished_ids,
-                                newly_timeout_accepted,
+                                newly_time_limit_accepted,
                                 metrics_runner,
                                 metrics_background_tasks,
                             )
@@ -398,9 +398,9 @@ class BenchmarkRunner:
                         f"no attempt passed LLM validation - staying pending"
                     )
 
-            if newly_timeout_accepted:
-                timeout_accepted_ids.update(newly_timeout_accepted)
-                logger.info(f"{len(newly_timeout_accepted)} timeout records accepted via gate bypass")
+            if newly_time_limit_accepted:
+                time_limit_accepted_ids.update(newly_time_limit_accepted)
+                logger.info(f"{len(newly_time_limit_accepted)} timeout records accepted via gate bypass")
 
             pending_output_ids = failed_this_attempt
 
@@ -507,7 +507,7 @@ class BenchmarkRunner:
                         "total_attempts": attempt_number,
                         "failed_record_ids": sorted(final_failed_ids),
                         "successful_record_ids": sorted(successful_ids),
-                        "timeout_accepted_record_ids": sorted(timeout_accepted_ids),
+                        "time_limit_accepted_record_ids": sorted(time_limit_accepted_ids),
                     },
                     "rerun_history": rerun_history,
                     "final_failures": final_failures,
@@ -1126,20 +1126,20 @@ class BenchmarkRunner:
         oid: str,
         failed_this_attempt: list[str],
         finished_ids: list[str],
-        newly_timeout_accepted: list[str],
+        newly_time_limit_accepted: list[str],
         metrics_runner: MetricsRunner | None,
         metrics_background_tasks: list[asyncio.Task],
     ) -> None:
         """Accept a timeout record by updating result.json and scheduling metrics."""
         failed_this_attempt.remove(oid)
         finished_ids.append(oid)
-        newly_timeout_accepted.append(oid)
-        # Update result.json with timeout_accepted flag
+        newly_time_limit_accepted.append(oid)
+        # Update result.json with time_limit_accepted flag
         result_path = self.output_dir / "records" / oid / "result.json"
         if result_path.exists():
             with open(result_path) as f:
                 result_data = json.load(f)
-            result_data["timeout_accepted"] = True
+            result_data["time_limit_accepted"] = True
             with open(result_path, "w") as f:
                 json.dump(result_data, f, indent=2)
         # Fire metrics if runner available

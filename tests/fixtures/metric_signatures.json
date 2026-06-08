@@ -35,10 +35,10 @@
     "source_hash": "91b71c803d77",
     "version": "v0.1"
   },
-  "ConversationTimeoutMetric": {
-    "name": "conversation_finished_on_time",
+  "ConversationTimeLimitExceededMetric": {
+    "name": "conversation_completed_on_time",
     "prompt_hash": null,
-    "source_hash": "16f8d343506c",
+    "source_hash": "85c95f1e1c13",
     "version": "v0.1"
   },
   "ConversationValidEndMetric": {

@@ -157,7 +157,7 @@ class ConversationWorker:
             try:
                 conversation_ended_reason = await asyncio.wait_for(
                     self._run_conversation(),
-                    timeout=self.config.conversation_timeout_seconds,
+                    timeout=self.config.conversation_time_limit_seconds,
                 )
                 logger.info(f"Conversation {self.record.id} ended: {conversation_ended_reason}")
             except TimeoutError:
