@@ -119,7 +119,7 @@ class ValidationRunner:
         Args:
             output_id: Record directory name (e.g. "1.2.1" or "1.2.1/trial_0").
             skip_gate: If True, bypass the conversation_valid_end gate and run only
-                LLM metrics. Used for timeout-accepted records where the conversation
+                LLM metrics. Used for time-limit-accepted records where the conversation
                 timed out (no goodbye event) but we still want to evaluate against
                 thresholds.
 

@@ -17,6 +17,7 @@ from eva.orchestrator.port_pool import PortPool
 from eva.orchestrator.validation_runner import ValidationResult, ValidationRunner
 from eva.orchestrator.worker import ConversationWorker
 from eva.utils.conversation_checks import check_conversation_finished, find_records_with_llm_generic_error
+from eva.utils.culture import get_language_addendum
 from eva.utils.logging import get_logger
 from eva.utils.provenance import capture_provenance, resolve_tool_module_file
 
@@ -52,13 +53,22 @@ class BenchmarkRunner:
             pool_size=config.port_pool_size,
         )
 
+        # Per-metric configuration derived from run config (e.g. language for stt_wer).
+        self._metric_configs: dict[str, dict] = {
+            "stt_wer": {"language": config.language.value},
+        }
+
         # Results tracking
         self._results: list[ConversationResult] = []
         self._failed_record_ids: list[str] = []
 
     def _load_agent_config(self) -> AgentConfig:
-        """Load single agent configuration."""
-        return AgentConfig.from_yaml(self.config.agent_config_path)
+        """Load single agent configuration; append the language addendum once."""
+        agent = AgentConfig.from_yaml(self.config.agent_config_path)
+        addendum = get_language_addendum(self.config.language)
+        if addendum:
+            agent.instructions = f"{agent.instructions}\n\n{addendum}"
+        return agent
 
     def _filter_records(self, records: list[EvaluationRecord]) -> list[EvaluationRecord]:
         """Filter records based on debug mode or record_ids.
@@ -142,7 +152,7 @@ class BenchmarkRunner:
         config_data = self.config.model_dump(mode="json")
         pipeline_parts = self.config.model.pipeline_parts
         config_data["pipeline_parts"] = pipeline_parts
-        config_path.write_text(json.dumps(config_data, indent=2))
+        config_path.write_text(json.dumps(config_data, indent=2, ensure_ascii=False))
 
         # Build output_id list for tracking (supports pass@k)
         num_trials = self.config.num_trials
@@ -159,8 +169,8 @@ class BenchmarkRunner:
         all_output_ids = list(output_id_to_record.keys())
         pending_output_ids = list(all_output_ids)
         rerun_history: dict[str, list[dict]] = {}
-        timeout_attempt_counts: dict[str, int] = {}
-        timeout_validation_cache: dict[str, dict[int, ValidationResult]] = {}
+        time_limit_attempt_counts: dict[str, int] = {}
+        time_limit_validation_cache: dict[str, dict[int, ValidationResult]] = {}
         max_time_limit_attempts = int(self.config.validation_thresholds.get("max_time_limit_attempts", 1))
         time_limit_accepted_ids: set[str] = set()
         started_at = datetime.now()
@@ -179,6 +189,7 @@ class BenchmarkRunner:
             run_dir=self.output_dir,
             dataset=_all_unique_records,
             thresholds=self.config.validation_thresholds,
+            metric_configs=self._metric_configs,
         )
 
         # Pre-create MetricsRunner so metrics can start as soon as records pass validation,
@@ -193,6 +204,7 @@ class BenchmarkRunner:
                     run_dir=self.output_dir,
                     dataset=all_unique_records,
                     metric_names=self.config.metrics,
+                    metric_configs=self._metric_configs,
                     num_draws=self.config.num_trials,
                     force_rerun=self.config.force_rerun_metrics,
                 )
@@ -299,14 +311,14 @@ class BenchmarkRunner:
             for oid in not_finished_ids:
                 # Distinguish timeout from other not_finished reasons
                 cr = result_map.get(oid)
-                is_timeout = cr is not None and cr.conversation_ended_reason == "timeout"
-                reason = "timeout" if is_timeout else "not_finished"
-                if is_timeout:
-                    timeout_attempt_counts[oid] = timeout_attempt_counts.get(oid, 0) + 1
-                    # Eagerly run LLM validation (skip gate) on every timeout attempt
+                hit_time_limit = cr is not None and cr.conversation_ended_reason == "time_limit_exceeded"
+                reason = "time_limit_exceeded" if hit_time_limit else "not_finished"
+                if hit_time_limit:
+                    time_limit_attempt_counts[oid] = time_limit_attempt_counts.get(oid, 0) + 1
+                    # Eagerly run LLM validation (skip gate) on every time-limit attempt
                     # and cache the result for later lookup.
                     vr = await pipeline_validation_runner.validate_one(oid, skip_gate=True)
-                    timeout_validation_cache.setdefault(oid, {})[attempt_number] = vr
+                    time_limit_validation_cache.setdefault(oid, {})[attempt_number] = vr
                 rerun_history.setdefault(oid, []).append(
                     {
                         "attempt": attempt_number,
@@ -327,25 +339,25 @@ class BenchmarkRunner:
                         entry["failure_details"] = failure_details
                 rerun_history.setdefault(oid, []).append(entry)
 
-            # Check for timeout-accepted records: records that have timed out
+            # Check for time-limit-accepted records: records that have hit the time limit
             # max_time_limit_attempts times get evaluated with gate bypass.
             # The current attempt was already validated eagerly above; if it passes,
             # accept immediately. Otherwise, scan cached results from previous
-            # timeout attempts and restore the archived directory if one passes.
+            # time-limit attempts and restore the archived directory if one passes.
             newly_time_limit_accepted: list[str] = []
             for oid in list(failed_this_attempt):
-                if timeout_attempt_counts.get(oid, 0) < max_time_limit_attempts:
+                if time_limit_attempt_counts.get(oid, 0) < max_time_limit_attempts:
                     continue
 
-                cached = timeout_validation_cache.get(oid, {})
+                cached = time_limit_validation_cache.get(oid, {})
                 # Check current attempt first
                 current_vr = cached.get(attempt_number)
                 if current_vr and current_vr.passed:
                     logger.info(
-                        f"Record {oid} timed out {timeout_attempt_counts[oid]} times, "
+                        f"Record {oid} hit time limit {time_limit_attempt_counts[oid]} times, "
                         f"current attempt passed LLM validation - accepting"
                     )
-                    self._accept_timeout_record(
+                    self._accept_time_limit_record(
                         oid,
                         failed_this_attempt,
                         finished_ids,
@@ -355,14 +367,14 @@ class BenchmarkRunner:
                     )
                     continue
 
-                # Scan previous timeout attempts for one that passed
+                # Scan previous time-limit attempts for one that passed
                 accepted_from_archive = False
                 for prev_attempt, prev_vr in cached.items():
                     if prev_attempt == attempt_number:
                         continue
                     if prev_vr.passed:
                         logger.info(
-                            f"Record {oid} timed out {timeout_attempt_counts[oid]} times, "
+                            f"Record {oid} hit time limit {time_limit_attempt_counts[oid]} times, "
                             f"restoring attempt {prev_attempt} which passed LLM validation"
                         )
                         # Restore the archived attempt directory
@@ -376,7 +388,7 @@ class BenchmarkRunner:
                                     str(self.output_dir / "records" / f"{oid}_failed_attempt_{attempt_number}"),
                                 )
                             shutil.move(str(archive_dir), str(record_dir))
-                            self._accept_timeout_record(
+                            self._accept_time_limit_record(
                                 oid,
                                 failed_this_attempt,
                                 finished_ids,
@@ -394,13 +406,13 @@ class BenchmarkRunner:
 
                 if not accepted_from_archive:
                     logger.info(
-                        f"Record {oid} timed out {timeout_attempt_counts[oid]} times, "
+                        f"Record {oid} hit time limit {time_limit_attempt_counts[oid]} times, "
                         f"no attempt passed LLM validation - staying pending"
                     )
 
             if newly_time_limit_accepted:
                 time_limit_accepted_ids.update(newly_time_limit_accepted)
-                logger.info(f"{len(newly_time_limit_accepted)} timeout records accepted via gate bypass")
+                logger.info(f"{len(newly_time_limit_accepted)} time-limit records accepted via gate bypass")
 
             pending_output_ids = failed_this_attempt
 
@@ -459,6 +471,7 @@ class BenchmarkRunner:
                     run_dir=self.output_dir,
                     dataset=successful_records,
                     metric_names=self.config.metrics,
+                    metric_configs=self._metric_configs,
                     record_ids=list(successful_ids),
                     num_draws=self.config.num_trials,
                     force_rerun=self.config.force_rerun_metrics,
@@ -723,6 +736,7 @@ class BenchmarkRunner:
                 run_dir=self.output_dir,
                 dataset=filtered_records,
                 thresholds=self.config.validation_thresholds,
+                metric_configs=self._metric_configs,
                 output_ids=needs_validation_ids,
             )
             validation_results = await validation_runner.run_validation()
@@ -778,6 +792,7 @@ class BenchmarkRunner:
                     run_dir=self.output_dir,
                     dataset=to_validate_records,
                     thresholds=self.config.validation_thresholds,
+                    metric_configs=self._metric_configs,
                     output_ids=to_validate_ids,
                 )
                 new_results = await vr_runner.run_validation()
@@ -831,6 +846,7 @@ class BenchmarkRunner:
                 run_dir=self.output_dir,
                 dataset=successful_records,
                 metric_names=self.config.metrics,
+                metric_configs=self._metric_configs,
                 record_ids=list(successful_ids),
                 num_draws=self.config.num_trials,
                 force_rerun=self.config.force_rerun_metrics,
@@ -911,7 +927,7 @@ class BenchmarkRunner:
 
         eval_summary_path = self.output_dir / "evaluation_summary.json"
         with open(eval_summary_path, "w") as f:
-            json.dump(eval_summary, f, indent=2)
+            json.dump(eval_summary, f, indent=2, ensure_ascii=False)
 
         # Terminal output — clearly separate simulation from metrics
         logger.info(f"{'=' * 60}")
@@ -1045,6 +1061,7 @@ class BenchmarkRunner:
             run_dir=run_dir,
             dataset=records,
             metric_names=metric_names,
+            metric_configs=self._metric_configs,
             record_ids=successful_ids,
             num_draws=self.config.num_trials,
             record_metric_filter=record_metric_filter,
@@ -1062,7 +1079,7 @@ class BenchmarkRunner:
         }
 
         with open(eval_summary_path, "w") as f:
-            json.dump(eval_summary, f, indent=2)
+            json.dump(eval_summary, f, indent=2, ensure_ascii=False)
 
         # Terminal output
         logger.info("=" * 60)
@@ -1121,7 +1138,7 @@ class BenchmarkRunner:
         runner.output_dir = run_dir  # Use existing output dir, don't create new
         return runner
 
-    def _accept_timeout_record(
+    def _accept_time_limit_record(
         self,
         oid: str,
         failed_this_attempt: list[str],
@@ -1130,7 +1147,7 @@ class BenchmarkRunner:
         metrics_runner: MetricsRunner | None,
         metrics_background_tasks: list[asyncio.Task],
     ) -> None:
-        """Accept a timeout record by updating result.json and scheduling metrics."""
+        """Accept a time-limit record by updating result.json and scheduling metrics."""
         failed_this_attempt.remove(oid)
         finished_ids.append(oid)
         newly_time_limit_accepted.append(oid)
