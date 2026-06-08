@@ -2523,10 +2523,10 @@ def render_record_detail(selected_run_dir: Path):
     if audio_path.exists() or el_audio_path.exists():
         st.markdown("### Audio Recording")
         if audio_path.exists():
-            st.audio(str(audio_path))
+            st.audio(audio_path)
         if el_audio_path.exists():
             st.caption("ElevenLabs recording")
-            st.audio(str(el_audio_path))
+            st.audio(el_audio_path)
 
     # User goal & ground truth
     with st.expander("User Goal", expanded=False):
@@ -2565,38 +2565,24 @@ def render_record_detail(selected_run_dir: Path):
 
     with tab2:
         st.markdown("### Transcript")
+        transcript_df = None
         if metrics and metrics.context and "turns_transcript" in metrics.context:
             try:
                 turns = metrics.context["turns_transcript"]
-                if turns:
-                    transcript_df = pd.DataFrame(turns)
-                    column_config = {}
-                    if "content" in transcript_df.columns:
-                        column_config["content"] = st.column_config.TextColumn("content", width="large")
-                    if "timestamp" in transcript_df.columns:
-                        column_config["timestamp"] = st.column_config.TextColumn("timestamp", width="small")
-                    if "role" in transcript_df.columns:
-                        column_config["role"] = st.column_config.TextColumn("role", width="small")
-                    st.dataframe(transcript_df, hide_index=True, column_config=column_config)
-                else:
-                    st.info("No transcript data available")
+                transcript_df = pd.DataFrame(turns) if turns else pd.DataFrame()
             except Exception:
-                transcript_df = format_transcript(selected_record_dir / "transcript.jsonl")
-                if not transcript_df.empty:
-                    st.dataframe(transcript_df, hide_index=True)
-        else:
+                transcript_df = None  # fall back to transcript.jsonl
+        if transcript_df is None:
             transcript_df = format_transcript(selected_record_dir / "transcript.jsonl")
-            if not transcript_df.empty:
-                column_config = {}
-                if "content" in transcript_df.columns:
-                    column_config["content"] = st.column_config.TextColumn("content", width="large")
-                if "timestamp" in transcript_df.columns:
-                    column_config["timestamp"] = st.column_config.TextColumn("timestamp", width="small")
-                if "role" in transcript_df.columns:
-                    column_config["role"] = st.column_config.TextColumn("role", width="small")
-                st.dataframe(transcript_df, hide_index=True, column_config=column_config)
-            else:
-                st.info("No transcript data available")
+        if transcript_df.empty:
+            st.info("No transcript data available")
+        else:
+            column_config = {
+                "content": st.column_config.TextColumn(width="large"),
+                "timestamp": st.column_config.TextColumn(width="small"),
+                "role": st.column_config.TextColumn(width="small"),
+            }
+            st.dataframe(transcript_df, hide_index=True, column_config=column_config)
 
     with tab3:
         render_metrics_tab(metrics)
