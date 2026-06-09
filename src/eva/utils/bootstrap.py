@@ -13,7 +13,11 @@ ALPHA = 0.05
 
 
 def run_seed(run_id: str) -> int:
-    """Seed from ``run_id`` using SHA-256; process-stable unlike Python's ``hash()``, so CI bounds are consistent across ``eva metrics`` invocations on the same run."""
+    """Seed from ``run_id`` using SHA-256.
+
+    Process-stable unlike Python's ``hash()``, so CI bounds are consistent across
+    ``eva metrics`` invocations on the same run.
+    """
     h = hashlib.sha256(run_id.encode()).digest()
     return int.from_bytes(h[:4], "big") % (2**31)
 
