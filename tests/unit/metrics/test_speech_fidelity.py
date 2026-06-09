@@ -237,11 +237,13 @@ class TestAgentFailureModeSubMetrics:
             "truncation_rate",
             "garbled_hallucination_rate",
             "insertion_hallucination_rate",
+            "wrong_language_rate",
         }
         assert result.sub_metrics["entity_error_rate"].score == 0.5
         assert result.sub_metrics["truncation_rate"].score == 0.5
         assert result.sub_metrics["garbled_hallucination_rate"].score == 0.0
         assert result.sub_metrics["insertion_hallucination_rate"].score == 0.0
+        assert result.sub_metrics["wrong_language_rate"].score == 0.0
         assert result.sub_metrics["entity_error_rate"].name == "agent_speech_fidelity.entity_error_rate"
         assert result.sub_metrics["entity_error_rate"].details == {
             "count": 1,
@@ -271,6 +273,7 @@ class TestAgentFailureModeSubMetrics:
             "truncation_rate",
             "garbled_hallucination_rate",
             "insertion_hallucination_rate",
+            "wrong_language_rate",
         ):
             assert result.sub_metrics[key].score == 0.0
         assert result.details["per_turn_failure_modes"] == {0: [], 1: []}
@@ -302,6 +305,7 @@ class TestAgentFailureModeSubMetrics:
             "truncation_rate",
             "garbled_hallucination_rate",
             "insertion_hallucination_rate",
+            "wrong_language_rate",
         }
         assert result.sub_metrics["entity_error_rate"].score == 0.5
 
