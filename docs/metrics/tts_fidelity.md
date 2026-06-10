@@ -1,6 +1,6 @@
-# Agent Speech Fidelity
+# TTS Fidelity
 
-> **Accuracy Metric**: If the agent's spoken audio doesn't match what it intended to say, the user receives incorrect information regardless of how good the text reasoning was.
+> **Diagnostic Metric**: If the agent's spoken audio doesn't match what it intended to say, the user receives incorrect information regardless of how good the text reasoning was.
 
 ## Overview
 
@@ -15,7 +15,7 @@ Audio-based metric that evaluates whether the assistant's **spoken audio** accur
 ### Evaluation Method
 
 - **Type**: Audio Judge (multimodal LLM with audio input)
-- **Model**: Gemini 3.1 Pro
+- **Model**: Gemini 3 Flash
 - **Granularity**: Per-turn (each assistant turn evaluated independently)
 
 ### Input Data
@@ -23,13 +23,6 @@ Audio-based metric that evaluates whether the assistant's **spoken audio** accur
 Uses the following MetricContext fields:
 - `audio_assistant_path`: Path to assistant-only audio file
 - `intended_assistant_turns`: What the assistant intended to say
-
-### Audio-Native vs Cascade
-
-The evaluation is the same in both cases — compare `intended_assistant_turns` against the actual spoken audio. The only difference is where the intended text comes from:
-
-- **Cascade**: The intended text is the input to the TTS engine (i.e., the LLM's text output).
-- **Audio-native (S2S, S2T+TTS):** The intended text is the text output that the audio-native model returns alongside its generated speech.
 
 ### Evaluation Methodology
 
@@ -56,7 +49,7 @@ The judge compares intended text against spoken audio, focusing on:
 
 ```json
 {
-  "name": "agent_speech_fidelity",
+  "name": "tts_fidelity",
   "score": 0.875,
   "normalized_score": 0.875,
   "details": {
@@ -79,8 +72,8 @@ The judge compares intended text against spoken audio, focusing on:
 
 ## Implementation Details
 
-- **File**: `src/eva/metrics/accuracy/agent_speech_fidelity.py`
-- **Class**: `AgentSpeechFidelityMetric`
+- **File**: `src/eva/metrics/diagnostic/tts_fidelity.py`
+- **Class**: `TTSFidelityMetric`
 - **Base Class**: `SpeechFidelityBaseMetric` → `AudioJudgeMetric`
-- **Prompt**: `configs/prompts/judge.yaml` under `judge.agent_speech_fidelity`
-- **Configuration**: `audio_judge_model` (default: Gemini 3.1 Pro), `aggregation` (default: "mean")
+- **Prompt**: `configs/prompts/judge.yaml` under `judge.tts_fidelity`
+- **Configuration**: `audio_judge_model` (default: Gemini 3 Flash), `aggregation` (default: "mean")

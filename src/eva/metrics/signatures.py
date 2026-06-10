@@ -27,8 +27,8 @@ from eva.utils.prompt_manager import get_prompt_manager
 def _all_concrete_versioned_metric_classes() -> dict[str, type[BaseMetric]]:
     """Walk BaseMetric subclasses; return concrete classes that set a version.
 
-    Keyed on class qualname so co-named classes (e.g., the cascade vs S2S
-    variants of `agent_speech_fidelity`) get distinct entries.
+    Keyed on class qualname (not metric name) so each concrete class gets a
+    distinct entry even if two ever shared a `name`.
     """
     result: dict[str, type[BaseMetric]] = {}
 
