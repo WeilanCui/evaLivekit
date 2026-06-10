@@ -54,7 +54,7 @@ Metrics that help isolate root causes of failures. These provide signals for und
 
 | Metric | Type | Capabilities | Description |
 |--------|------|-------------|-------------|
-| [`tts_fidelity`](tts_fidelity.md) | Audio Judge (Gemini) | Speech Synthesis | Whether assistant speech audio matches intended text (0-1) |
+| [`tts_fidelity`](tts_fidelity.md) | Audio Judge (Gemini) | Speech Synthesis | Whether assistant speech audio matches intended text (0-1). **Opt-in** — excluded from the default run; enable via `--metrics tts_fidelity`. |
 | [`authentication_success`](authentication_success.md) | Deterministic | Speech Recognition, Language Model | Whether get_reservation was called successfully (0-1) |
 | [`response_speed`](response_speed.md) | Deterministic | VAD, Pipeline | Latency between user utterance end and assistant response start (seconds) |
 | [`speakability`](speakability.md) | Judge | Language Model | Whether text is voice-friendly and appropriate for TTS (0-1) |
@@ -123,10 +123,10 @@ python main.py \
     --run-id <existing_run_id> \
     --metrics turn_taking,conciseness,conversation_progression
 
-# Run diagnostic metrics
+# Run diagnostic metrics (tts_fidelity is opt-in and only runs when named explicitly)
 python main.py \
     --run-id <existing_run_id> \
-    --metrics authentication_success,response_speed,speakability,stt_wer,tool_call_validity,transcription_accuracy_key_entities
+    --metrics authentication_success,response_speed,speakability,stt_wer,tool_call_validity,transcription_accuracy_key_entities,tts_fidelity
 
 # Run validation metrics
 python main.py \

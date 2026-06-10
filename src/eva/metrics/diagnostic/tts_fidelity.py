@@ -31,6 +31,7 @@ class TTSFidelityMetric(SpeechFidelityBaseMetric):
     category = "diagnostic"
     role = "assistant"
     exclude_from_pass_at_k = True
+    exclude_from_default_metrics = True
     supported_pipeline_types = frozenset({PipelineType.CASCADE, PipelineType.AUDIO_LLM})
     rating_scale = (0, 1)
 
