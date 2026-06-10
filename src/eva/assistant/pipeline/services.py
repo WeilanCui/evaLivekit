@@ -176,7 +176,10 @@ def create_stt_service(
             flux_settings_kwargs: dict[str, Any] = {"model": params["model"]}
             # Flux ignores `language`; only `flux-general-multi` honors `language_hints`.
             if params["model"] == "flux-general-multi":
-                flux_settings_kwargs["language_hints"] = [_to_language_enum(language_code)]
+                if params.get("language_hints"):
+                    flux_settings_kwargs["language_hints"] = params["language_hints"]
+                else:
+                    logger.warning("No Language hint provided. Auto detecting language for Deepgram Flux")
             return DeepgramFluxSTTService(
                 api_key=api_key,
                 sample_rate=SAMPLE_RATE,
@@ -391,7 +394,7 @@ def create_tts_service(
         supported = ["en-us", "en-gb", "es", "fr-fr", "hi", "it", "pt-br", "ja", "zh"]
         if language_code not in supported:
             logger.warning(f"Language code {language_code} not supported by Kokoro, trying to convert to 4 char code")
-            two_to_four = {"en": "en-us", "fr": "fr-fr", "pt": "pt-br"}
+            two_to_four = {"en": "en-us", "fr": "fr-fr", "fr-CA": "fr-fr", "pt": "pt-br"}
             language_code = two_to_four.get(language_code, language_code)
             if language_code not in supported:
                 raise ValueError(f"Language code {language_code} not supported by Kokoro")
