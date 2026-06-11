@@ -345,6 +345,7 @@ class ConversationWorker:
             language,
             self.record.romanized_culture_overrides,
             self.record.starting_utterances,
+            aliases_dir=self.config.aliases_path,
         )
         resolved_persona = resolve_user_config(
             self.record.user_config,

@@ -8,6 +8,7 @@ import asyncio
 import time
 from typing import Any
 
+import tiktoken
 from openai import AsyncOpenAI
 
 from eva.assistant.pipeline.alm_base import (
@@ -113,7 +114,8 @@ class ALMvLLMClient(BaseALMClient):
                 usage = response.usage
 
                 # Extract reasoning content if present (OpenAI o1 and compatible models)
-                reasoning_content = getattr(message, "reasoning_content", None)
+                # vLLM versions use different field names: "reasoning_content" vs "reasoning"
+                reasoning_content = getattr(message, "reasoning_content", None) or getattr(message, "reasoning", None)
 
                 # Extract reasoning tokens if present
                 reasoning_tokens = 0
@@ -121,6 +123,20 @@ class ALMvLLMClient(BaseALMClient):
                     details = usage.completion_tokens_details
                     if details and hasattr(details, "reasoning_tokens"):
                         reasoning_tokens = getattr(details, "reasoning_tokens", 0)
+
+                if reasoning_content and reasoning_tokens == 0:
+                    if not getattr(self, "_reasoning_token_fallback_warned", False):
+                        logger.warning(
+                            "No reasoning token count found in API response for model '%s'; "
+                            "falling back to tiktoken approximation. This warning will not repeat.",
+                            self.model,
+                        )
+                        self._reasoning_token_fallback_warned = True
+                    try:
+                        enc = tiktoken.encoding_for_model(self.model)
+                    except KeyError:
+                        enc = tiktoken.get_encoding("cl100k_base")
+                    reasoning_tokens = len(enc.encode(reasoning_content))
 
                 stats = {
                     "prompt_tokens": usage.prompt_tokens if usage else 0,
