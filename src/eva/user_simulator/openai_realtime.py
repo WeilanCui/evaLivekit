@@ -70,6 +70,7 @@ class OpenAIRealtimeUserSimulator(AbstractUserSimulator):
         agent_id: str,
         timeout: int = 600,
         perturbation_config: PerturbationConfig | None = None,
+        language: str = "en",
         *,
         simulator_config: UserSimulatorConfig,
     ) -> None:
@@ -82,6 +83,7 @@ class OpenAIRealtimeUserSimulator(AbstractUserSimulator):
             agent_id=agent_id,
             timeout=timeout,
             perturbation_config=perturbation_config,
+            language=language,
             provider="openai_realtime",
         )
         if perturbation_config and perturbation_config.accent is not None:

@@ -8,10 +8,12 @@ from functools import lru_cache
 from pathlib import Path
 
 import yaml
+from pipecat.transcriptions.language import Language
 
-from eva.models.config import PerturbationConfig
+from eva.models.config import LANGUAGE_DISPLAY_NAMES, PerturbationConfig
 from eva.user_simulator.event_logger import UserSimulatorEventLogger
 from eva.user_simulator.perturbation import AudioPerturbator
+from eva.utils.culture import add_user_language_directive
 from eva.utils.logging import current_record_id, get_logger
 from eva.utils.prompt_manager import PromptManager
 
@@ -42,6 +44,7 @@ class AbstractUserSimulator(ABC):
         agent_id: str,
         timeout: int = 600,
         perturbation_config: PerturbationConfig | None = None,
+        language: str = "en",
         *,
         provider: str,
         write_legacy_elevenlabs_log: bool = False,
@@ -55,6 +58,7 @@ class AbstractUserSimulator(ABC):
         self.current_date_time = current_date_time
         self.agent_id = agent_id
         self._perturbation_config = perturbation_config
+        self._language = language
         self._perturbator = (
             AudioPerturbator(perturbation_config)
             if perturbation_config is not None
@@ -88,6 +92,12 @@ class AbstractUserSimulator(ABC):
             user_persona = behavior_prompts[self._perturbation_config.behavior.value]
         else:
             user_persona = behavior_prompts["default"]
+
+        user_persona = add_user_language_directive(
+            self._language,
+            LANGUAGE_DISPLAY_NAMES.get(Language(self._language), self._language),
+            user_persona,
+        )
 
         domain = self.agent_id.removeprefix("agent_")
         return PromptManager().get_prompt(

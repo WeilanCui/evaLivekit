@@ -180,7 +180,7 @@ class UserSimulatorEventLogger:
         self.output_path.parent.mkdir(parents=True, exist_ok=True)
 
         with open(self.output_path, "w") as f:
-            f.writelines(json.dumps(event) + "\n" for event in self._events)
+            f.writelines(json.dumps(event, ensure_ascii=False) + "\n" for event in self._events)
 
         if self.legacy_output_path is not None:
             self.legacy_output_path.parent.mkdir(parents=True, exist_ok=True)

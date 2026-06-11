@@ -49,6 +49,7 @@ class ElevenLabsUserSimulator(AbstractUserSimulator):
         agent_id: str,
         timeout: int = 600,
         perturbation_config: PerturbationConfig | None = None,
+        language: str = "en",
     ):
         """Initialize the user simulator.
 
@@ -61,6 +62,7 @@ class ElevenLabsUserSimulator(AbstractUserSimulator):
             timeout: Conversation timeout in seconds
             agent_id: Agent identifier used to select the domain-specific simulator prompt
             perturbation_config: Optional perturbation to apply to user audio
+            language: ISO 639-1 code (e.g. 'en', 'fr'); when not 'en', uses EVA_{LANG}_USER_{gender}
         """
         super().__init__(
             current_date_time=current_date_time,
@@ -71,6 +73,7 @@ class ElevenLabsUserSimulator(AbstractUserSimulator):
             agent_id=agent_id,
             timeout=timeout,
             perturbation_config=perturbation_config,
+            language=language,
             provider="elevenlabs",
             write_legacy_elevenlabs_log=True,
         )
@@ -136,6 +139,7 @@ class ElevenLabsUserSimulator(AbstractUserSimulator):
                 httpx_client=http_client,
             )
 
+
             # Create conversation config with dynamic variables
             config = ConversationInitiationData(dynamic_variables={"prompt": self._build_prompt()})
 
@@ -149,7 +153,8 @@ class ElevenLabsUserSimulator(AbstractUserSimulator):
                 key = self._perturbation_config.behavior.value.upper()
                 env_var = f"EVA_{key}_USER_{gender}"
             else:
-                env_var = f"EVA_DEFAULT_USER_{gender}"
+                lang = (self._language or "en").upper().replace("-", "_")
+                env_var = f"EVA_{lang}_USER_{gender}"
             ELEVENLABS_USER_AGENT_ID = os.getenv(env_var)
             logger.info(f"Using agent ID from env var: {env_var}")
 
@@ -281,7 +286,7 @@ class ElevenLabsUserSimulator(AbstractUserSimulator):
             details_path = self.output_dir / "elevenlabs_conversation_details.json"
             try:
                 with open(details_path, "w") as f:
-                    json.dump(conv_details.model_dump(), f, indent=2, default=str)
+                    json.dump(conv_details.model_dump(), f, indent=2, default=str, ensure_ascii=False)
             except Exception as e:
                 logger.warning(f"Failed to write conversation details to {details_path}: {e}")
 
