@@ -139,7 +139,6 @@ class ElevenLabsUserSimulator(AbstractUserSimulator):
                 httpx_client=http_client,
             )
 
-
             # Create conversation config with dynamic variables
             config = ConversationInitiationData(dynamic_variables={"prompt": self._build_prompt()})
 

@@ -32,8 +32,8 @@
   "ConversationValidEndMetric": {
     "name": "conversation_valid_end",
     "prompt_hash": null,
-    "source_hash": "a52233ab765a",
-    "version": "v0.1"
+    "source_hash": "66b235e067bd",
+    "version": "v0.2"
   },
   "FaithfulnessJudgeMetric": {
     "name": "faithfulness",
