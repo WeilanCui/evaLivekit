@@ -7,6 +7,7 @@ from types import SimpleNamespace
 from typing import Any
 
 import litellm
+import tiktoken
 from dotenv import load_dotenv
 from openai.types.chat import ChatCompletionMessageToolCall
 
@@ -119,6 +120,19 @@ class LiteLLMClient:
                 if reasoning_content:
                     logger.info(f"💭 Reasoning content from {model} ({len(reasoning_content)} chars)")
                     logger.debug(f"Reasoning content preview: {reasoning_content[:200]}...")
+                    if reasoning_tokens == 0:
+                        if not getattr(self, "_reasoning_token_fallback_warned", False):
+                            logger.warning(
+                                "No reasoning token count found in API response for model '%s'; "
+                                "falling back to tiktoken approximation. This warning will not repeat.",
+                                self.model,
+                            )
+                            self._reasoning_token_fallback_warned = True
+                        try:
+                            enc = tiktoken.encoding_for_model(self.model)
+                        except KeyError:
+                            enc = tiktoken.get_encoding("cl100k_base")
+                        reasoning_tokens = len(enc.encode(reasoning_content))
 
                 # Gemini thought signatures are handled automatically by LiteLLM
                 # They are stored in provider_specific_fields and preserved across turns
