@@ -18,7 +18,7 @@ except ImportError:
     import audioop_lts as audioop
 
 from eva.models.config import OpenAIRealtimeSimulatorConfig, PerturbationConfig
-from eva.user_simulator.audio_interface import BotToBotAudioBridge
+from eva.user_simulator.audio_bridge import BotToBotAudioBridge
 from eva.user_simulator.base import AbstractUserSimulator
 from eva.utils.audio_utils import save_pcm_as_wav
 from eva.utils.logging import get_logger

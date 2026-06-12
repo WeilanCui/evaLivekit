@@ -14,7 +14,7 @@ def create_user_simulator(
 ) -> AbstractUserSimulator:
     """Create the configured simulated caller without importing unused providers."""
     if isinstance(simulator_config, ElevenLabsSimulatorConfig):
-        from eva.user_simulator.client import ElevenLabsUserSimulator
+        from eva.user_simulator.elevenlabs import ElevenLabsUserSimulator
 
         return ElevenLabsUserSimulator(**kwargs)
     if isinstance(simulator_config, OpenAIRealtimeSimulatorConfig):

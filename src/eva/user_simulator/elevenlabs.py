@@ -17,7 +17,7 @@ from elevenlabs.conversational_ai.conversation import (
 )
 
 from eva.models.config import PerturbationConfig
-from eva.user_simulator.audio_interface import ELEVENLABS_OUTPUT_RATE, BotToBotAudioInterface
+from eva.user_simulator.audio_bridge import ELEVENLABS_OUTPUT_RATE, ElevenLabsAudioInterface
 from eva.user_simulator.base import AbstractUserSimulator, load_behavior_prompts
 from eva.utils.audio_utils import save_pcm_as_wav
 from eva.utils.logging import current_record_id, get_logger
@@ -116,7 +116,7 @@ class ElevenLabsUserSimulator(AbstractUserSimulator):
         conversation_id = self.output_dir.name
 
         # Create audio interface
-        self._audio_interface = BotToBotAudioInterface(
+        self._audio_interface = ElevenLabsAudioInterface(
             websocket_uri=self.server_url,
             conversation_id=conversation_id,
             record_callback=self._record_audio,
@@ -458,7 +458,3 @@ class ElevenLabsUserSimulator(AbstractUserSimulator):
         user_audio = b"".join(self._user_audio_chunks)
         assistant_audio = b"".join(self._assistant_audio_chunks)
         return user_audio, assistant_audio
-
-
-# Historical import retained for downstream users and existing tests.
-UserSimulator = ElevenLabsUserSimulator

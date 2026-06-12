@@ -1,8 +1,8 @@
-"""Unit tests for BotToBotAudioInterface.
+"""Unit tests for BotToBotAudioBridge and ElevenLabsAudioInterface.
 
-Focuses on: PCM→μ-law conversion correctness, silence detection state machine,
-_receive_from_assistant message dispatch, audio state transitions, and
-WebSocket lifecycle.
+Tests are written against ElevenLabsAudioInterface (the concrete subclass) but
+most exercise logic defined in BotToBotAudioBridge: PCM→μ-law conversion,
+silence detection state machine, audio state transitions, and WebSocket lifecycle.
 """
 
 import asyncio
@@ -12,15 +12,15 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from eva.user_simulator.audio_interface import (
+from eva.user_simulator.audio_bridge import (
     ASSISTANT_SAMPLE_RATE,
     SEND_CHUNK_SIZE_PCM,
-    BotToBotAudioInterface,
+    ElevenLabsAudioInterface,
 )
 
 
-def _make_interface(**overrides) -> BotToBotAudioInterface:
-    """Create a BotToBotAudioInterface with defaults for testing."""
+def _make_interface(**overrides) -> ElevenLabsAudioInterface:
+    """Create a ElevenLabsAudioInterface with defaults for testing."""
     defaults = {
         "websocket_uri": "ws://localhost:9999",
         "conversation_id": "test-conv-123",
@@ -29,7 +29,7 @@ def _make_interface(**overrides) -> BotToBotAudioInterface:
         "conversation_done_callback": None,
     }
     defaults.update(overrides)
-    return BotToBotAudioInterface(**defaults)
+    return ElevenLabsAudioInterface(**defaults)
 
 
 class TestConvertPcmToMulaw:
@@ -38,7 +38,7 @@ class TestConvertPcmToMulaw:
     def test_20ms_chunk_produces_correct_output_size(self):
         """640 bytes PCM (20ms @ 16kHz) → 160 bytes μ-law (20ms @ 8kHz)."""
         pcm_20ms = b"\x00" * SEND_CHUNK_SIZE_PCM  # 640 bytes
-        result = BotToBotAudioInterface._convert_pcm_to_mulaw(pcm_20ms)
+        result = ElevenLabsAudioInterface._convert_pcm_to_mulaw(pcm_20ms)
         expected_mulaw_len = int(ASSISTANT_SAMPLE_RATE * 0.02)  # 160
         assert len(result) == expected_mulaw_len
 
@@ -47,15 +47,15 @@ class TestConvertPcmToMulaw:
         silence = b"\x00" * SEND_CHUNK_SIZE_PCM
         # Sawtooth-ish pattern (loud enough to differ from silence in μ-law)
         loud = bytes([(i * 50) % 256 for i in range(SEND_CHUNK_SIZE_PCM)])
-        mulaw_silence = BotToBotAudioInterface._convert_pcm_to_mulaw(silence)
-        mulaw_loud = BotToBotAudioInterface._convert_pcm_to_mulaw(loud)
+        mulaw_silence = ElevenLabsAudioInterface._convert_pcm_to_mulaw(silence)
+        mulaw_loud = ElevenLabsAudioInterface._convert_pcm_to_mulaw(loud)
         assert mulaw_silence != mulaw_loud
 
     def test_odd_size_input_does_not_crash(self):
         """Gracefully handles misaligned input (odd byte count)."""
         # 3 bytes is not sample-aligned (16-bit = 2 bytes per sample)
         # audioop may truncate or error; we just want no crash
-        result = BotToBotAudioInterface._convert_pcm_to_mulaw(b"\x01\x02\x03")
+        result = ElevenLabsAudioInterface._convert_pcm_to_mulaw(b"\x01\x02\x03")
         assert isinstance(result, bytes)
 
 

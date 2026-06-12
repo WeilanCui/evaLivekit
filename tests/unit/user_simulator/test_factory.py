@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from eva.models.config import ElevenLabsSimulatorConfig, OpenAIRealtimeSimulatorConfig
-from eva.user_simulator.client import ElevenLabsUserSimulator
+from eva.user_simulator.elevenlabs import ElevenLabsUserSimulator
 from eva.user_simulator.factory import create_user_simulator
 from eva.user_simulator.openai_realtime import OpenAIRealtimeUserSimulator
 

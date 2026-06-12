@@ -796,7 +796,3 @@ class BotToBotAudioBridge:
 
 class ElevenLabsAudioInterface(BotToBotAudioBridge, AudioInterface):
     """ElevenLabs SDK adapter around the provider-neutral audio bridge."""
-
-
-# Historical name retained for compatibility with existing integrations.
-BotToBotAudioInterface = ElevenLabsAudioInterface
