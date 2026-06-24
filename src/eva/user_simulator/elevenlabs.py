@@ -78,7 +78,7 @@ class ElevenLabsUserSimulator(AbstractUserSimulator):
 
         # Keep-alive inactivity detection
         self._consecutive_keepalive_count = 0
-        self._max_consecutive_keepalives = 5  # eva_chariot patch: 5 (not 12) — the LiveKit bridge has no separate idle cap, so this bounds how long EVA waits on a silent agent before scoring the run. Reapplied on re-clone by eva_chariot/scripts/install.sh.
+        self._max_consecutive_keepalives = 5  # 5 (not 12): the LiveKit bridge has no separate idle cap, so this bounds how long EVA waits on a silent agent before scoring.
 
     async def run_conversation(self) -> str:
         """Run the conversation until completion.

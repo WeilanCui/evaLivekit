@@ -2,8 +2,8 @@
 
 EVA's orchestrator constructs one of these per scenario record, calls
 ``start()`` to bring up a Twilio-framed WebSocket on a port from the pool,
-EVA's user-simulator dials it, and we proxy audio + lifecycle to a real
-LiveKit voice agent (the chariot intake agent, running in docker).
+EVA's user-simulator dials it, and we proxy audio + lifecycle to the real
+LiveKit voice agent under evaluation.
 
 Unlike the in-tree servers (OpenAI Realtime, Gemini, …) the "model" under
 test is not an API we call directly — it's an agent that joins a LiveKit
@@ -24,11 +24,13 @@ Audio runs at 24 kHz throughout (EVA's ``SAMPLE_RATE``) so we reuse
 ``audio_bridge``'s mulaw<->pcm helpers and the inherited audio recording /
 mixing in ``AbstractAssistantServer``.
 
-Configuration: LiveKit connection comes from ``LIVEKIT_URL`` /
-``LIVEKIT_API_KEY`` / ``LIVEKIT_API_SECRET`` (env, standard for any LiveKit
-deployment). Agent-specific values (agent name, SIP attributes, caller/trunk
-numbers) are read from ``pipeline_config.s2s_params`` when present, else from
-env vars, else chariot defaults — see ``_resolve_config``.
+Configuration (see ``_cfg``): LiveKit connection comes from ``LIVEKIT_URL`` /
+``LIVEKIT_API_KEY`` / ``LIVEKIT_API_SECRET``. Agent-specific values — the
+``agent_name`` to dispatch, whether to ``dispatch`` at all, and any
+``participant_attributes`` (e.g. ``sip.*``) the agent expects — come from
+``pipeline_config.s2s_params`` when present, else from env
+(``LIVEKIT_AGENT_NAME`` / ``LIVEKIT_PARTICIPANT_ATTRIBUTES``). Nothing here is
+specific to any particular agent.
 
 Dev / staging only — never run with prod LiveKit credentials.
 """
@@ -75,11 +77,6 @@ _FRAME_BYTES = _FRAME_SAMPLES * 2  # 960
 # Twilio media frames are 160 bytes (20 ms @ 8 kHz mulaw, 1 byte/sample).
 _MULAW_CHUNK_SIZE = 160
 _MULAW_CHUNK_DURATION_S = 0.02
-
-# Chariot defaults — overridable via s2s_params or env (see _resolve_config).
-_DEFAULT_AGENT_NAME = "chariot-agent"
-_DEFAULT_FROM_NUMBER = "+15555550100"
-_DEFAULT_TO_NUMBER = "+15555550101"
 
 # LiveKit Agents forwards transcriptions over a text stream on this topic, one
 # stream per speech segment (see livekit.agents.voice.room_io._output). Mirrors
@@ -319,17 +316,26 @@ class LiveKitAssistantServer(AbstractAssistantServer):
                 "LIVEKIT_API_KEY / LIVEKIT_API_SECRET (or s2s_params url/"
                 "api_key/api_secret)."
             )
-        agent_name = self._cfg("agent_name", "LIVEKIT_AGENT_NAME", _DEFAULT_AGENT_NAME)
-        from_num = self._cfg(
-            "from_number", "CHARIOT_TEST_FROM_NUMBER", _DEFAULT_FROM_NUMBER
-        )
-        to_num = self._cfg("to_number", "CHARIOT_TEST_TRUNK_NUMBER", _DEFAULT_TO_NUMBER)
         params = self.pipeline_config.s2s_params or {}
-        attributes = params.get("participant_attributes") or {
-            "sip.phoneNumber": from_num,
-            "sip.trunkPhoneNumber": to_num,
-        }
+        agent_name = self._cfg("agent_name", "LIVEKIT_AGENT_NAME")
         should_dispatch = params.get("dispatch", True)
+        if should_dispatch and not agent_name:
+            raise RuntimeError(
+                "No agent to dispatch: set s2s_params.agent_name or "
+                "LIVEKIT_AGENT_NAME (or s2s_params.dispatch=false if the agent "
+                "joins the room on its own)."
+            )
+        # Attributes copied onto the bridge participant's token — e.g. the
+        # sip.* attributes a SIP-style agent reads to take its inbound-call
+        # path. The caller supplies whatever its agent expects; none by default.
+        attributes = params.get("participant_attributes")
+        if attributes is None:
+            raw_attrs = os.environ.get("LIVEKIT_PARTICIPANT_ATTRIBUTES")
+            try:
+                attributes = json.loads(raw_attrs) if raw_attrs else {}
+            except json.JSONDecodeError:
+                logger.warning("LIVEKIT_PARTICIPANT_ATTRIBUTES is not valid JSON; ignoring")
+                attributes = {}
 
         # Unique room per scenario run.
         self._room_name = f"eva-{self.conversation_id}-{secrets.token_hex(4)}"

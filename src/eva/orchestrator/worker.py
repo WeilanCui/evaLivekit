@@ -50,8 +50,6 @@ def _get_server_class(framework: str) -> type[AbstractAssistantServer]:
 
         return GrokVoiceAssistantServer
     elif framework == "livekit":
-        # eva_chariot patch: framework=livekit -> the chariot LiveKit bridge
-        # server (symlinked into eva/src/eva/assistant/ by install.sh).
         from eva.assistant.livekit_server import LiveKitAssistantServer
 
         return LiveKitAssistantServer

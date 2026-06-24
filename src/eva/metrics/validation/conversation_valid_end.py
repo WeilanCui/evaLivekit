@@ -21,10 +21,9 @@ class ConversationValidEndMetric(CodeMetric):
     category = "validation"
 
     async def compute(self, context: MetricContext) -> MetricScore:
-        # eva_chariot patch: short-circuit for the livekit framework. The native
-        # end-state check requires pipecat-shaped data the bridge doesn't
-        # reproduce; we trust the recorded conversation and let the LLM judges
-        # score it. Reapplied on re-clone by eva_chariot/scripts/install.sh.
+        # Short-circuit for the livekit framework: the native end-state check
+        # requires pipecat-shaped data the bridge doesn't reproduce, so we trust
+        # the recorded conversation and let the LLM judges score it.
         if os.environ.get("EVA_FRAMEWORK") == "livekit":
             return MetricScore(
                 name=self.name,
