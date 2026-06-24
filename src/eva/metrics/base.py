@@ -330,7 +330,13 @@ class TextJudgeMetric(BaseMetric):
 
     # Subclasses can override these
     default_model = "gpt-5.2"
-    default_params: dict[str, Any] = {"max_tokens": 100000, "service_tier": "flex"}
+    # eva_chariot patch: 100000 exceeds GPT-4o's 16384 cap on completion tokens
+    # and causes the judge calls to fail with BadRequestError. The cap is only
+    # on the JUDGE'S RESPONSE LENGTH (a short score + reasoning), not on the
+    # transcript we're analysing, so lowering it doesn't change scoring at all
+    # — it just lets the API call succeed. Reapplied on re-clone by
+    # eva_chariot/scripts/install.sh.
+    default_params: dict[str, Any] = {"max_tokens": 16384, "service_tier": "flex"}
     rating_scale: tuple[int, int] = (1, 3)  # (min, max)
 
     def __init__(self, config: dict[str, Any] | None = None):

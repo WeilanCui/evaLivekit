@@ -49,10 +49,16 @@ def _get_server_class(framework: str) -> type[AbstractAssistantServer]:
         from eva.assistant.grok_voice_server import GrokVoiceAssistantServer
 
         return GrokVoiceAssistantServer
+    elif framework == "livekit":
+        # eva_chariot patch: framework=livekit -> the chariot LiveKit bridge
+        # server (symlinked into eva/src/eva/assistant/ by install.sh).
+        from eva.assistant.livekit_server import LiveKitAssistantServer
+
+        return LiveKitAssistantServer
     else:
         raise ValueError(
             f"Unknown framework: {framework!r}. "
-            "Supported: pipecat, openai_realtime, gemini_live, elevenlabs, grok_voice"
+            "Supported: pipecat, openai_realtime, gemini_live, elevenlabs, grok_voice, livekit"
         )
 
 

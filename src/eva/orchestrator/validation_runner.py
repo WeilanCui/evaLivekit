@@ -1,6 +1,7 @@
 """Validation metrics runner for benchmark validation mode."""
 
 import asyncio
+import os
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -13,7 +14,16 @@ from eva.utils.logging import get_logger
 logger = get_logger(__name__)
 
 GATE_METRIC = "conversation_valid_end"
-LLM_METRICS = ["user_behavioral_fidelity", "user_speech_fidelity"]
+# eva_chariot patch: the user-simulator fidelity checks are pipecat-instrumented
+# (they consume pipecat_logs.jsonl and per-turn ids the LiveKit bridge can't
+# reproduce faithfully). Skip them when the agent under test is reached via the
+# livekit framework — conversation_valid_end alone is the validation gate there.
+# Reapplied on re-clone by eva_chariot/scripts/install.sh.
+LLM_METRICS = (
+    []
+    if os.environ.get("EVA_FRAMEWORK") == "livekit"
+    else ["user_behavioral_fidelity", "user_speech_fidelity"]
+)
 
 
 @dataclass
