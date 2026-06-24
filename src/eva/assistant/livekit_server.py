@@ -87,6 +87,12 @@ _ATTR_SEGMENT_ID = "lk.segment_id"
 # always the agent, but this attribute points at whoever actually spoke.
 _ATTR_TRANSCRIBED_TRACK_ID = "lk.transcribed_track_id"
 
+# Tool calls: the chariot agent forwards each executed tool call + result on this
+# text-stream topic (see livekit_agent.py). The agent already ran the tool
+# against the real DB, so we only RECORD it in the audit log — we never call
+# self.execute_tool() here (that would re-run it against EVA's stub).
+_TOOL_CALLS_TOPIC = "lk.tool_calls"
+
 
 def _wall_ms() -> int:
     return int(round(time.time() * 1000))
@@ -135,6 +141,12 @@ class LiveKitAssistantServer(AbstractAssistantServer):
         self._transcript_segments: dict[str, dict[str, str]] = {}
         self._transcription_tasks: set[asyncio.Task] = set()
         self._fwlog_turn_counter = 0
+
+        # Tool calls forwarded by the agent on _TOOL_CALLS_TOPIC. Buffered with a
+        # timestamp and merged with transcript turns (by ts) at teardown so the
+        # audit log preserves conversation order.
+        self._tool_calls: list[dict[str, Any]] = []
+        self._tool_call_tasks: set[asyncio.Task] = set()
 
     # ---- Config resolution ----------------------------------------------
 
@@ -268,7 +280,10 @@ class LiveKitAssistantServer(AbstractAssistantServer):
 
                 elif event == "user_speech_stop":
                     self._user_speaking = False
-                    self._user_speech_stopped_wall_ms = _wall_ms()
+                    # Prefer the simulator's wall-clock timestamp for an accurate
+                    # model-response latency; fall back to now if absent.
+                    ts = msg.get("timestamp_ms")
+                    self._user_speech_stopped_wall_ms = int(ts) if ts else _wall_ms()
 
                 elif event == "stop":
                     logger.info(f"[{self.conversation_id}] EVA sent stop")
@@ -358,6 +373,10 @@ class LiveKitAssistantServer(AbstractAssistantServer):
         self._room.register_text_stream_handler(
             _TRANSCRIPTION_TOPIC, self._on_transcription_stream
         )
+        # Tool calls the agent executes are forwarded here for the audit log.
+        self._room.register_text_stream_handler(
+            _TOOL_CALLS_TOPIC, self._on_tool_call_stream
+        )
 
         await self._room.connect(
             lk_url, token, options=rtc.RoomOptions(auto_subscribe=True)
@@ -438,6 +457,7 @@ class LiveKitAssistantServer(AbstractAssistantServer):
             self._transcript_segments[seg_id] = {
                 "role": "user" if is_user else "assistant",
                 "text": text,
+                "ts": start_ts_ms,
             }
             if not is_user and self._fw_log:
                 # Per-assistant-turn events for the metrics processor. User turns
@@ -451,32 +471,97 @@ class LiveKitAssistantServer(AbstractAssistantServer):
                 f"[{self.conversation_id}] error reading transcription stream"
             )
 
-    async def _drain_and_flush_transcripts(self) -> None:
-        """Let in-flight reads finish, then append captured turns to the audit log.
+    # ---- Tool-call capture ----------------------------------------------
 
-        Called during teardown while the room is still connected. Segments are
-        emitted in first-seen order, which tracks the conversation order.
+    def _on_tool_call_stream(
+        self, reader: rtc.TextStreamReader, participant_identity: str
+    ) -> None:
+        """Text-stream handler for tool calls — reading is async, hand off."""
+        task = asyncio.create_task(self._consume_tool_call(reader))
+        self._tool_call_tasks.add(task)
+        task.add_done_callback(self._tool_call_tasks.discard)
+
+    async def _consume_tool_call(self, reader: rtc.TextStreamReader) -> None:
+        """Read one forwarded tool-call event and buffer it (logged at teardown).
+
+        Payload (JSON) is whatever the agent published on _TOOL_CALLS_TOPIC:
+        ``{name, arguments (JSON string), result (str), is_error, call_id}``.
         """
-        if self._transcription_tasks:
+        try:
+            ts_ms = _wall_ms()
+            raw = await reader.read_all()
+            if not raw:
+                return
+            evt = json.loads(raw)
+            self._tool_calls.append({"ts": ts_ms, "evt": evt})
+        except Exception:
+            logger.exception(
+                f"[{self.conversation_id}] error reading tool-call stream"
+            )
+
+    @staticmethod
+    def _as_dict(value: Any) -> dict[str, Any]:
+        """Coerce a tool argument/result into a dict for the audit log."""
+        if isinstance(value, dict):
+            return value
+        if isinstance(value, str) and value:
+            try:
+                parsed = json.loads(value)
+                return parsed if isinstance(parsed, dict) else {"value": parsed}
+            except json.JSONDecodeError:
+                return {"value": value}
+        return {} if value in (None, "") else {"value": value}
+
+    async def _drain_and_flush_transcripts(self) -> None:
+        """Let in-flight reads finish, then append captured turns + tool calls.
+
+        Called during teardown while the room is still connected. Transcript
+        segments and forwarded tool calls are merged by timestamp so the audit
+        log preserves conversation order.
+        """
+        pending = self._transcription_tasks | self._tool_call_tasks
+        if pending:
             try:
                 await asyncio.wait_for(
-                    asyncio.gather(*self._transcription_tasks, return_exceptions=True),
-                    timeout=3,
+                    asyncio.gather(*pending, return_exceptions=True), timeout=3
                 )
             except asyncio.TimeoutError:
-                for t in list(self._transcription_tasks):
+                for t in list(pending):
                     t.cancel()
+
+        # Merge turns + tool calls by timestamp (turns sort before tool calls at
+        # an equal ts, so a turn's tool calls follow the turn text).
+        events: list[tuple[int, int, str, Any]] = []
         for seg in self._transcript_segments.values():
-            if seg["role"] == "user":
-                self.audit_log.append_user_input(seg["text"])
-            else:
-                self.audit_log.append_assistant_output(seg["text"])
-        if self._transcript_segments:
+            events.append((int(seg.get("ts") or 0), 0, "turn", seg))
+        for tc in self._tool_calls:
+            events.append((int(tc.get("ts") or 0), 1, "tool", tc["evt"]))
+        events.sort(key=lambda e: (e[0], e[1]))
+
+        for ts_ms, _order, kind, item in events:
+            if kind == "turn":
+                ts = str(item["ts"]) if item.get("ts") is not None else None
+                if item["role"] == "user":
+                    self.audit_log.append_user_input(item["text"], timestamp_ms=ts)
+                else:
+                    self.audit_log.append_assistant_output(item["text"], timestamp_ms=ts)
+            else:  # tool call: record (do NOT re-execute — agent already ran it)
+                name = item.get("name") or "unknown_tool"
+                self.audit_log.append_realtime_tool_call(
+                    name, self._as_dict(item.get("arguments"))
+                )
+                self.audit_log.append_tool_response(
+                    name, self._as_dict(item.get("result"))
+                )
+
+        if self._transcript_segments or self._tool_calls:
             logger.info(
                 f"[{self.conversation_id}] flushed "
-                f"{len(self._transcript_segments)} transcript segments to audit log"
+                f"{len(self._transcript_segments)} transcript segments + "
+                f"{len(self._tool_calls)} tool calls to audit log"
             )
         self._transcript_segments = {}
+        self._tool_calls = []
 
     # ---- Audio pumps -----------------------------------------------------
 
