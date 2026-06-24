@@ -330,11 +330,7 @@ class TextJudgeMetric(BaseMetric):
 
     # Subclasses can override these
     default_model = "gpt-5.2"
-    # 100000 exceeds GPT-4o's 16384 cap on completion tokens and makes the judge
-    # calls fail with BadRequestError. The cap is only on the JUDGE'S RESPONSE
-    # LENGTH (a short score + reasoning), not the transcript being analysed, so
-    # lowering it doesn't change scoring — it just lets the API call succeed.
-    default_params: dict[str, Any] = {"max_tokens": 16384, "service_tier": "flex"}
+    default_params: dict[str, Any] = {"max_tokens": 100000, "service_tier": "flex"}
     rating_scale: tuple[int, int] = (1, 3)  # (min, max)
 
     def __init__(self, config: dict[str, Any] | None = None):
