@@ -93,6 +93,10 @@ _ATTR_TRANSCRIBED_TRACK_ID = "lk.transcribed_track_id"
 # self.execute_tool() here (that would re-run it against EVA's stub).
 _TOOL_CALLS_TOPIC = "lk.tool_calls"
 
+# LLM token usage: the agent forwards per-response {model, prompt_tokens,
+# completion_tokens} on this topic → self._metrics_log.write_token_usage.
+_METRICS_TOPIC = "lk.metrics"
+
 
 def _wall_ms() -> int:
     return int(round(time.time() * 1000))
@@ -147,6 +151,8 @@ class LiveKitAssistantServer(AbstractAssistantServer):
         # audit log preserves conversation order.
         self._tool_calls: list[dict[str, Any]] = []
         self._tool_call_tasks: set[asyncio.Task] = set()
+        # Token-usage metric reads (written live to pipecat_metrics.jsonl).
+        self._metrics_tasks: set[asyncio.Task] = set()
 
     # ---- Config resolution ----------------------------------------------
 
@@ -377,6 +383,10 @@ class LiveKitAssistantServer(AbstractAssistantServer):
         self._room.register_text_stream_handler(
             _TOOL_CALLS_TOPIC, self._on_tool_call_stream
         )
+        # LLM token-usage metrics forwarded by the agent.
+        self._room.register_text_stream_handler(
+            _METRICS_TOPIC, self._on_metrics_stream
+        )
 
         await self._room.connect(
             lk_url, token, options=rtc.RoomOptions(auto_subscribe=True)
@@ -512,6 +522,38 @@ class LiveKitAssistantServer(AbstractAssistantServer):
                 return {"value": value}
         return {} if value in (None, "") else {"value": value}
 
+    # ---- Token-usage capture --------------------------------------------
+
+    def _on_metrics_stream(
+        self, reader: rtc.TextStreamReader, participant_identity: str
+    ) -> None:
+        """Text-stream handler for token-usage metrics — read async."""
+        task = asyncio.create_task(self._consume_metrics(reader))
+        self._metrics_tasks.add(task)
+        task.add_done_callback(self._metrics_tasks.discard)
+
+    async def _consume_metrics(self, reader: rtc.TextStreamReader) -> None:
+        """Record one forwarded LLM token-usage event in pipecat_metrics.jsonl.
+
+        Payload (JSON): ``{model, prompt_tokens, completion_tokens}``. Written
+        live (metrics entries are independent, not order-sensitive).
+        """
+        try:
+            raw = await reader.read_all()
+            if not raw or not self._metrics_log:
+                return
+            evt = json.loads(raw)
+            self._metrics_log.write_token_usage(
+                processor=self._metrics_processor_name,
+                model=evt.get("model") or self._service_name,
+                prompt_tokens=int(evt.get("prompt_tokens") or 0),
+                completion_tokens=int(evt.get("completion_tokens") or 0),
+            )
+        except Exception:
+            logger.exception(
+                f"[{self.conversation_id}] error reading metrics stream"
+            )
+
     async def _drain_and_flush_transcripts(self) -> None:
         """Let in-flight reads finish, then append captured turns + tool calls.
 
@@ -519,7 +561,7 @@ class LiveKitAssistantServer(AbstractAssistantServer):
         segments and forwarded tool calls are merged by timestamp so the audit
         log preserves conversation order.
         """
-        pending = self._transcription_tasks | self._tool_call_tasks
+        pending = self._transcription_tasks | self._tool_call_tasks | self._metrics_tasks
         if pending:
             try:
                 await asyncio.wait_for(
