@@ -54,6 +54,10 @@ from eva.assistant.audio_bridge import (
     sync_buffer_to_position,
 )
 from eva.assistant.base_server import AbstractAssistantServer
+from eva.assistant.livekit_agent_hooks import (
+    METRICS_TOPIC as _METRICS_TOPIC,
+    TOOL_CALLS_TOPIC as _TOOL_CALLS_TOPIC,
+)
 from eva.utils.logging import get_logger
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from livekit import api, rtc
@@ -87,15 +91,13 @@ _ATTR_SEGMENT_ID = "lk.segment_id"
 # always the agent, but this attribute points at whoever actually spoke.
 _ATTR_TRANSCRIBED_TRACK_ID = "lk.transcribed_track_id"
 
-# Tool calls: the chariot agent forwards each executed tool call + result on this
-# text-stream topic (see livekit_agent.py). The agent already ran the tool
-# against the real DB, so we only RECORD it in the audit log — we never call
-# self.execute_tool() here (that would re-run it against EVA's stub).
-_TOOL_CALLS_TOPIC = "lk.tool_calls"
-
-# LLM token usage: the agent forwards per-response {model, prompt_tokens,
-# completion_tokens} on this topic → self._metrics_log.write_token_usage.
-_METRICS_TOPIC = "lk.metrics"
+# _TOOL_CALLS_TOPIC / _METRICS_TOPIC are imported from livekit_agent_hooks (the
+# reusable agent-side publisher) so the two ends share one source of truth:
+#  - lk.tool_calls : the agent forwards each executed tool call + result. The
+#    agent already ran it against the real DB, so we only RECORD it in the audit
+#    log — we never call self.execute_tool() (that would re-run the stub).
+#  - lk.metrics    : the agent forwards {model, prompt_tokens, completion_tokens}
+#    per response → self._metrics_log.write_token_usage.
 
 
 def _wall_ms() -> int:
