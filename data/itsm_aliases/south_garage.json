@@ -1,0 +1,29 @@
+{
+  "name": "South Garage",
+  "translatable": true,
+  "base": [
+    "south parking"
+  ],
+  "translations": {
+    "fr": [
+      "garage sud",
+      "parking sud",
+      "stationnement sud"
+    ],
+    "fr-CA": [
+      "garage sud",
+      "parking sud",
+      "stationnement sud"
+    ],
+    "es": [
+      "aparcamiento sur",
+      "garaje sur",
+      "parking sur"
+    ],
+    "de": [
+      "parkhaus süd",
+      "süd-parkhaus",
+      "südparkhaus"
+    ]
+  }
+}

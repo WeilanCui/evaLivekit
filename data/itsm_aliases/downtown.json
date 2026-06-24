@@ -1,0 +1,43 @@
+{
+  "name": "Downtown",
+  "translatable": true,
+  "base": [
+    "downtown building",
+    "sales hq",
+    "downtown office"
+  ],
+  "translations": {
+    "fr": [
+      "bureau du centre-ville",
+      "bâtiment downtown",
+      "bâtiment du centre-ville",
+      "centre-ville",
+      "site centre-ville",
+      "site du centre-ville",
+      "édifice du centre-ville"
+    ],
+    "fr-CA": [
+      "bureau du centre-ville",
+      "bâtiment downtown",
+      "bâtiment du centre-ville",
+      "centre-ville",
+      "site centre-ville",
+      "site du centre-ville",
+      "édifice du centre-ville"
+    ],
+    "es": [
+      "centro",
+      "edificio del centro",
+      "oficina del centro",
+      "sede de ventas"
+    ],
+    "de": [
+      "büro in der stadt",
+      "gebäude in der innenstadt",
+      "headquarter in der city",
+      "innenstadt",
+      "innenstadtbüro",
+      "vertriebszentrale"
+    ]
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "name": "Garage B",
+  "translatable": true,
+  "base": [
+    "west garage"
+  ],
+  "translations": {
+    "fr": [
+      "garage b",
+      "garage ouest",
+      "parking b",
+      "parking ouest",
+      "stationnement b"
+    ],
+    "fr-CA": [
+      "garage b",
+      "garage ouest",
+      "parking b",
+      "parking ouest",
+      "stationnement b"
+    ],
+    "es": [
+      "aparcamiento b",
+      "garaje b",
+      "garaje oeste",
+      "parking b"
+    ],
+    "de": [
+      "b-parkhaus",
+      "parkhaus b",
+      "west-parkhaus"
+    ]
+  }
+}

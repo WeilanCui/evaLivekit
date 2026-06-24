@@ -1,0 +1,46 @@
+{
+  "name": "Executive Garage",
+  "translatable": true,
+  "base": [
+    "executive garage",
+    "exec garage",
+    "main garage",
+    "executive <last_name>ing"
+  ],
+  "translations": {
+    "fr": [
+      "garage de la direction",
+      "garage des cadres",
+      "garage direction",
+      "garage exécutif",
+      "parking de la direction",
+      "parking des dirigeants",
+      "parking direction",
+      "parking exécutif",
+      "stationnement exécutif"
+    ],
+    "fr-CA": [
+      "garage de la direction",
+      "garage des cadres",
+      "garage direction",
+      "garage exécutif",
+      "parking de la direction",
+      "parking des dirigeants",
+      "parking direction",
+      "parking exécutif",
+      "stationnement exécutif"
+    ],
+    "es": [
+      "aparcamiento ejecutivo",
+      "garaje de dirección",
+      "garaje ejecutivo",
+      "garaje principal",
+      "parking ejecutivo"
+    ],
+    "de": [
+      "managerparkhaus",
+      "parkhaus der geschäftsleitung",
+      "parkhaus für führungskräfte"
+    ]
+  }
+}

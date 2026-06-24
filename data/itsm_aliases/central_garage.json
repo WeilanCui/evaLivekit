@@ -1,0 +1,33 @@
+{
+  "name": "Central Garage",
+  "translatable": true,
+  "base": [
+    "central parking"
+  ],
+  "translations": {
+    "fr": [
+      "garage central",
+      "parc central",
+      "parking central",
+      "stationnement central"
+    ],
+    "fr-CA": [
+      "garage central",
+      "parc central",
+      "parking central",
+      "stationnement central"
+    ],
+    "es": [
+      "aparcamiento central",
+      "garaje central",
+      "parking central"
+    ],
+    "de": [
+      "parkhaus im zentrum",
+      "parkhaus in der city",
+      "parkhaus in der innenstadt",
+      "zentralen parkhaus",
+      "zentrales parkhaus"
+    ]
+  }
+}

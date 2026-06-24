@@ -1,0 +1,49 @@
+{
+  "name": "North Surface Lot",
+  "translatable": true,
+  "base": [
+    "north lot",
+    "north parking",
+    "north lot at headquarters"
+  ],
+  "translations": {
+    "fr": [
+      "aire de stationnement nord",
+      "lot nord",
+      "parc nord",
+      "parking extérieur nord",
+      "parking nord",
+      "parking nord en surface",
+      "parking nord extérieur",
+      "stationnement extérieur nord",
+      "stationnement nord",
+      "terrain nord"
+    ],
+    "fr-CA": [
+      "aire de stationnement nord",
+      "lot nord",
+      "parc nord",
+      "parking extérieur nord",
+      "parking nord",
+      "parking nord en surface",
+      "parking nord extérieur",
+      "stationnement extérieur nord",
+      "stationnement nord",
+      "terrain nord"
+    ],
+    "es": [
+      "aparcamiento en superficie norte",
+      "aparcamiento norte",
+      "aparcamiento norte al aire libre",
+      "explanada de aparcamiento norte",
+      "explanada norte de aparcamiento de la sede",
+      "parking norte",
+      "parking norte de la sede"
+    ],
+    "de": [
+      "nordparkplatz",
+      "nordparkplatz an der zentrale",
+      "parkplatz nord"
+    ]
+  }
+}

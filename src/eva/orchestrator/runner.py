@@ -3,9 +3,13 @@
 import asyncio
 import json
 import shutil
+import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, TextIO
+
+from tqdm.asyncio import tqdm
+from tqdm.std import Bar
 
 from eva.metrics.legacy_aliases import rename_metric_keys, rename_metric_list
 from eva.metrics.runner import MetricsRunner, MetricsRunResult
@@ -17,10 +21,30 @@ from eva.orchestrator.port_pool import PortPool
 from eva.orchestrator.validation_runner import ValidationResult, ValidationRunner
 from eva.orchestrator.worker import ConversationWorker
 from eva.utils.conversation_checks import check_conversation_finished, find_records_with_llm_generic_error
+from eva.utils.culture import get_language_addendum
 from eva.utils.logging import get_logger
 from eva.utils.provenance import capture_provenance, resolve_tool_module_file
 
 logger = get_logger(__name__)
+
+# Register a bright blue progress-bar colour.
+Bar.COLOURS["BRIGHT_BLUE"] = "\x1b[94m"
+
+
+class TqdmNewlineStream:
+    """Stream proxy that writes newline-terminated lines rather than tqdm's in-place '\r' redraws."""
+
+    def __init__(self, stream: TextIO) -> None:
+        self._stream = stream
+
+    def write(self, s: str) -> int:
+        s = s.lstrip("\r")
+        if s and not s.endswith("\n"):
+            s += "\n"
+        return self._stream.write(s)
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._stream, name)
 
 
 class BenchmarkRunner:
@@ -52,13 +76,22 @@ class BenchmarkRunner:
             pool_size=config.port_pool_size,
         )
 
+        # Per-metric configuration derived from run config (e.g. language for stt_wer).
+        self._metric_configs: dict[str, dict] = {
+            "stt_wer": {"language": config.language.value},
+        }
+
         # Results tracking
         self._results: list[ConversationResult] = []
         self._failed_record_ids: list[str] = []
 
     def _load_agent_config(self) -> AgentConfig:
-        """Load single agent configuration."""
-        return AgentConfig.from_yaml(self.config.agent_config_path)
+        """Load single agent configuration; append the language addendum once."""
+        agent = AgentConfig.from_yaml(self.config.agent_config_path)
+        addendum = get_language_addendum(self.config.language)
+        if addendum:
+            agent.instructions = f"{agent.instructions}\n\n{addendum}"
+        return agent
 
     def _filter_records(self, records: list[EvaluationRecord]) -> list[EvaluationRecord]:
         """Filter records based on debug mode or record_ids.
@@ -142,7 +175,7 @@ class BenchmarkRunner:
         config_data = self.config.model_dump(mode="json")
         pipeline_parts = self.config.model.pipeline_parts
         config_data["pipeline_parts"] = pipeline_parts
-        config_path.write_text(json.dumps(config_data, indent=2))
+        config_path.write_text(json.dumps(config_data, indent=2, ensure_ascii=False))
 
         # Build output_id list for tracking (supports pass@k)
         num_trials = self.config.num_trials
@@ -159,6 +192,10 @@ class BenchmarkRunner:
         all_output_ids = list(output_id_to_record.keys())
         pending_output_ids = list(all_output_ids)
         rerun_history: dict[str, list[dict]] = {}
+        time_limit_attempt_counts: dict[str, int] = {}
+        time_limit_validation_cache: dict[str, dict[int, ValidationResult]] = {}
+        max_time_limit_attempts = int(self.config.validation_thresholds.get("max_time_limit_attempts", 1))
+        time_limit_accepted_ids: set[str] = set()
         started_at = datetime.now()
 
         # Initialize port pool once before the attempt loop.
@@ -175,6 +212,7 @@ class BenchmarkRunner:
             run_dir=self.output_dir,
             dataset=_all_unique_records,
             thresholds=self.config.validation_thresholds,
+            metric_configs=self._metric_configs,
         )
 
         # Pre-create MetricsRunner so metrics can start as soon as records pass validation,
@@ -189,6 +227,7 @@ class BenchmarkRunner:
                     run_dir=self.output_dir,
                     dataset=all_unique_records,
                     metric_names=self.config.metrics,
+                    metric_configs=self._metric_configs,
                     num_draws=self.config.num_trials,
                     force_rerun=self.config.force_rerun_metrics,
                 )
@@ -200,13 +239,6 @@ class BenchmarkRunner:
         for attempt_number in range(1, max_attempts + 1):
             if not pending_output_ids:
                 break
-
-            logger.info(
-                f"\n{'=' * 60}\n"
-                f"Attempt {attempt_number}/{max_attempts}: "
-                f"Running {len(pending_output_ids)} tasks\n"
-                f"{'=' * 60}"
-            )
 
             # STEPS 1-3: Per-record pipeline — run, validate, and fire metrics as each
             # conversation completes rather than waiting for the full batch.
@@ -260,8 +292,15 @@ class BenchmarkRunner:
                     logger.error(f"Pipeline error for {output_id}: {exc}", exc_info=True)
                     return output_id, exc, False, None
 
-            pipeline_results = await asyncio.gather(
+            pipeline_results = await tqdm.gather(
                 *(_run_and_pipeline(output_id_to_record[oid], oid) for oid in pending_output_ids),
+                total=len(pending_output_ids),
+                desc=f"Attempt {attempt_number}/{max_attempts}",
+                file=TqdmNewlineStream(sys.stderr),
+                mininterval=0,
+                unit="task",
+                smoothing=0,  # Smoothing would produce unstable estimates because tasks run in parallel.
+                colour="BRIGHT_BLUE",
             )
 
             # Collect per-record outcomes.
@@ -272,8 +311,11 @@ class BenchmarkRunner:
             not_finished_ids: list[str] = []
             failed_validation_ids: list[str] = []
             validation_results: dict[str, ValidationResult] = {}
+            result_map: dict[str, ConversationResult] = {}
 
             for output_id, _result, passed, vr in pipeline_results:
+                if isinstance(_result, ConversationResult):
+                    result_map[output_id] = _result
                 if vr is None or (not vr.passed and not vr.failed_metrics):
                     not_finished_ids.append(output_id)
                 else:
@@ -290,10 +332,20 @@ class BenchmarkRunner:
             failed_this_attempt = not_finished_ids + failed_validation_ids
 
             for oid in not_finished_ids:
+                # Distinguish time limit exceeded from other not_finished reasons
+                cr = result_map.get(oid)
+                hit_time_limit = cr is not None and cr.conversation_ended_reason == "time_limit_exceeded"
+                reason = "time_limit_exceeded" if hit_time_limit else "not_finished"
+                if hit_time_limit:
+                    time_limit_attempt_counts[oid] = time_limit_attempt_counts.get(oid, 0) + 1
+                    # Eagerly run LLM validation (skip gate) on every time-limit attempt
+                    # and cache the result for later lookup.
+                    vr = await pipeline_validation_runner.validate_one(oid, skip_gate=True)
+                    time_limit_validation_cache.setdefault(oid, {})[attempt_number] = vr
                 rerun_history.setdefault(oid, []).append(
                     {
                         "attempt": attempt_number,
-                        "reason": "not_finished",
+                        "reason": reason,
                     }
                 )
             for oid in failed_validation_ids:
@@ -309,6 +361,81 @@ class BenchmarkRunner:
                     if failure_details:
                         entry["failure_details"] = failure_details
                 rerun_history.setdefault(oid, []).append(entry)
+
+            # Check for time-limit-accepted records: records that have hit the time limit
+            # max_time_limit_attempts times get evaluated with gate bypass.
+            # The current attempt was already validated eagerly above; if it passes,
+            # accept immediately. Otherwise, scan cached results from previous
+            # time-limit attempts and restore the archived directory if one passes.
+            newly_time_limit_accepted: list[str] = []
+            for oid in list(failed_this_attempt):
+                if time_limit_attempt_counts.get(oid, 0) < max_time_limit_attempts:
+                    continue
+
+                cached = time_limit_validation_cache.get(oid, {})
+                # Check current attempt first
+                current_vr = cached.get(attempt_number)
+                if current_vr and current_vr.passed:
+                    logger.info(
+                        f"Record {oid} hit time limit {time_limit_attempt_counts[oid]} times, "
+                        f"current attempt passed LLM validation - accepting"
+                    )
+                    self._accept_time_limit_record(
+                        oid,
+                        failed_this_attempt,
+                        finished_ids,
+                        newly_time_limit_accepted,
+                        metrics_runner,
+                        metrics_background_tasks,
+                    )
+                    continue
+
+                # Scan previous time-limit attempts for one that passed
+                accepted_from_archive = False
+                for prev_attempt, prev_vr in cached.items():
+                    if prev_attempt == attempt_number:
+                        continue
+                    if prev_vr.passed:
+                        logger.info(
+                            f"Record {oid} hit time limit {time_limit_attempt_counts[oid]} times, "
+                            f"restoring attempt {prev_attempt} which passed LLM validation"
+                        )
+                        # Restore the archived attempt directory
+                        archive_dir = self.output_dir / "records" / f"{oid}_failed_attempt_{prev_attempt}"
+                        record_dir = self.output_dir / "records" / oid
+                        if archive_dir.exists():
+                            # Move current attempt out of the way, restore the passing one
+                            if record_dir.exists():
+                                shutil.move(
+                                    str(record_dir),
+                                    str(self.output_dir / "records" / f"{oid}_failed_attempt_{attempt_number}"),
+                                )
+                            shutil.move(str(archive_dir), str(record_dir))
+                            self._accept_time_limit_record(
+                                oid,
+                                failed_this_attempt,
+                                finished_ids,
+                                newly_time_limit_accepted,
+                                metrics_runner,
+                                metrics_background_tasks,
+                            )
+                            accepted_from_archive = True
+                            break
+                        else:
+                            logger.warning(
+                                f"Record {oid}: archive dir for attempt {prev_attempt} not found at "
+                                f"{archive_dir} - cannot restore, skipping"
+                            )
+
+                if not accepted_from_archive:
+                    logger.info(
+                        f"Record {oid} hit time limit {time_limit_attempt_counts[oid]} times, "
+                        f"no attempt passed LLM validation - staying pending"
+                    )
+
+            if newly_time_limit_accepted:
+                time_limit_accepted_ids.update(newly_time_limit_accepted)
+                logger.info(f"{len(newly_time_limit_accepted)} time-limit records accepted via gate bypass")
 
             pending_output_ids = failed_this_attempt
 
@@ -367,6 +494,7 @@ class BenchmarkRunner:
                     run_dir=self.output_dir,
                     dataset=successful_records,
                     metric_names=self.config.metrics,
+                    metric_configs=self._metric_configs,
                     record_ids=list(successful_ids),
                     num_draws=self.config.num_trials,
                     force_rerun=self.config.force_rerun_metrics,
@@ -415,6 +543,7 @@ class BenchmarkRunner:
                         "total_attempts": attempt_number,
                         "failed_record_ids": sorted(final_failed_ids),
                         "successful_record_ids": sorted(successful_ids),
+                        "time_limit_accepted_record_ids": sorted(time_limit_accepted_ids),
                     },
                     "rerun_history": rerun_history,
                     "final_failures": final_failures,
@@ -434,7 +563,7 @@ class BenchmarkRunner:
 
         self._save_results_csv(successful_results, list(final_failed_ids))
 
-        logger.info(f"\n{'=' * 60}")
+        logger.info("=" * 60)
         logger.info("Benchmark complete:")
         if total_tasks > 0:
             logger.info(f"  Success: {successful_count}/{total_tasks} ({successful_count / total_tasks * 100:.1f}%)")
@@ -446,7 +575,7 @@ class BenchmarkRunner:
         else:
             logger.info("  No records processed")
         logger.info(f"  Total attempts used: {attempt_number}")
-        logger.info(f"{'=' * 60}\n")
+        logger.info("=" * 60)
 
         return RunResult(
             run_id=self.config.run_id,
@@ -630,6 +759,7 @@ class BenchmarkRunner:
                 run_dir=self.output_dir,
                 dataset=filtered_records,
                 thresholds=self.config.validation_thresholds,
+                metric_configs=self._metric_configs,
                 output_ids=needs_validation_ids,
             )
             validation_results = await validation_runner.run_validation()
@@ -654,10 +784,6 @@ class BenchmarkRunner:
         for attempt_number in range(1, max_attempts + 1):
             if not pending_ids:
                 break
-
-            logger.info(
-                f"\n{'=' * 60}\nRerun attempt {attempt_number}/{max_attempts}: {len(pending_ids)} tasks\n{'=' * 60}"
-            )
 
             # Archive failed outputs
             for output_id in pending_ids:
@@ -685,6 +811,7 @@ class BenchmarkRunner:
                     run_dir=self.output_dir,
                     dataset=to_validate_records,
                     thresholds=self.config.validation_thresholds,
+                    metric_configs=self._metric_configs,
                     output_ids=to_validate_ids,
                 )
                 new_results = await vr_runner.run_validation()
@@ -738,6 +865,7 @@ class BenchmarkRunner:
                 run_dir=self.output_dir,
                 dataset=successful_records,
                 metric_names=self.config.metrics,
+                metric_configs=self._metric_configs,
                 record_ids=list(successful_ids),
                 num_draws=self.config.num_trials,
                 force_rerun=self.config.force_rerun_metrics,
@@ -818,10 +946,10 @@ class BenchmarkRunner:
 
         eval_summary_path = self.output_dir / "evaluation_summary.json"
         with open(eval_summary_path, "w") as f:
-            json.dump(eval_summary, f, indent=2)
+            json.dump(eval_summary, f, indent=2, ensure_ascii=False)
 
         # Terminal output — clearly separate simulation from metrics
-        logger.info(f"{'=' * 60}")
+        logger.info("=" * 60)
         logger.info("EVALUATION COMPLETE")
         logger.info("=" * 60)
         logger.info("Simulation:")
@@ -952,6 +1080,7 @@ class BenchmarkRunner:
             run_dir=run_dir,
             dataset=records,
             metric_names=metric_names,
+            metric_configs=self._metric_configs,
             record_ids=successful_ids,
             num_draws=self.config.num_trials,
             record_metric_filter=record_metric_filter,
@@ -969,7 +1098,7 @@ class BenchmarkRunner:
         }
 
         with open(eval_summary_path, "w") as f:
-            json.dump(eval_summary, f, indent=2)
+            json.dump(eval_summary, f, indent=2, ensure_ascii=False)
 
         # Terminal output
         logger.info("=" * 60)
@@ -1027,6 +1156,33 @@ class BenchmarkRunner:
         runner = cls(config)
         runner.output_dir = run_dir  # Use existing output dir, don't create new
         return runner
+
+    def _accept_time_limit_record(
+        self,
+        oid: str,
+        failed_this_attempt: list[str],
+        finished_ids: list[str],
+        newly_time_limit_accepted: list[str],
+        metrics_runner: MetricsRunner | None,
+        metrics_background_tasks: list[asyncio.Task],
+    ) -> None:
+        """Accept a time-limit record by updating result.json and scheduling metrics."""
+        failed_this_attempt.remove(oid)
+        finished_ids.append(oid)
+        newly_time_limit_accepted.append(oid)
+        # Update result.json with time_limit_accepted flag
+        result_path = self.output_dir / "records" / oid / "result.json"
+        if result_path.exists():
+            with open(result_path) as f:
+                result_data = json.load(f)
+            result_data["time_limit_accepted"] = True
+            with open(result_path, "w") as f:
+                json.dump(result_data, f, indent=2)
+        # Fire metrics if runner available
+        if metrics_runner is not None:
+            rdir = self.output_dir / "records" / oid
+            task = asyncio.create_task(metrics_runner.run_and_save_record(oid, rdir))
+            metrics_background_tasks.append(task)
 
     def _archive_failed_attempt(self, record_id: str, attempt_number: int) -> None:
         """Archive a failed attempt before rerunning.

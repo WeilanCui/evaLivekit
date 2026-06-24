@@ -1,0 +1,45 @@
+{
+  "name": "Harbor Engineering Center",
+  "translatable": true,
+  "base": [
+    "engineering hq",
+    "harbor"
+  ],
+  "translations": {
+    "fr": [
+      "centre d’ingénierie du port",
+      "centre d’ingénierie harbor",
+      "centre ingénierie harbor",
+      "centre technique du port",
+      "centre technique harbor",
+      "qg d’ingénierie",
+      "qg ingénierie",
+      "site du port",
+      "site ingénierie harbor"
+    ],
+    "fr-CA": [
+      "centre d’ingénierie du port",
+      "centre d’ingénierie harbor",
+      "centre ingénierie harbor",
+      "centre technique du port",
+      "centre technique harbor",
+      "qg d’ingénierie",
+      "qg ingénierie",
+      "site du port",
+      "site ingénierie harbor"
+    ],
+    "es": [
+      "centro de ingeniería del puerto",
+      "ingeniería del puerto",
+      "puerto",
+      "sede de ingeniería"
+    ],
+    "de": [
+      "engineering-zentrale",
+      "entwicklungszentrum am hafen",
+      "entwicklungszentrum hafen",
+      "hafen",
+      "technikzentrum am hafen"
+    ]
+  }
+}

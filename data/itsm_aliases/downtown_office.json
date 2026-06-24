@@ -1,0 +1,46 @@
+{
+  "name": "Downtown Office",
+  "translatable": true,
+  "base": [
+    "downtown",
+    "finance building",
+    "main hr office"
+  ],
+  "translations": {
+    "fr": [
+      "bureau downtown",
+      "bureau du centre-ville",
+      "bureaux du centre-ville",
+      "bâtiment finance",
+      "bâtiment finances",
+      "centre-ville",
+      "site du centre-ville",
+      "édifice des finances"
+    ],
+    "fr-CA": [
+      "bureau downtown",
+      "bureau du centre-ville",
+      "bureaux du centre-ville",
+      "bâtiment finance",
+      "bâtiment finances",
+      "centre-ville",
+      "site du centre-ville",
+      "édifice des finances"
+    ],
+    "es": [
+      "centro",
+      "edificio de finanzas",
+      "oficina del centro",
+      "oficina principal de rrhh"
+    ],
+    "de": [
+      "buchhaltung im zentrum",
+      "büro in der city",
+      "büro in der innenstadt",
+      "finanzabteilung in der city",
+      "hauptpersonalbüro",
+      "innenstadtbüro",
+      "personalbüro in der innenstadt"
+    ]
+  }
+}

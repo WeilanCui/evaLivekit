@@ -1,0 +1,34 @@
+{
+  "name": "North Garage",
+  "translatable": true,
+  "base": [
+    "north garage",
+    "garage a",
+    "main garage",
+    "north parking"
+  ],
+  "translations": {
+    "fr": [
+      "garage nord",
+      "parking nord",
+      "stationnement nord"
+    ],
+    "fr-CA": [
+      "garage nord",
+      "parking nord",
+      "stationnement nord"
+    ],
+    "es": [
+      "aparcamiento norte",
+      "garaje norte",
+      "garaje principal",
+      "parking norte"
+    ],
+    "de": [
+      "hauptparkhaus",
+      "nord-parkhaus",
+      "nordparkhaus",
+      "parkhaus nord"
+    ]
+  }
+}
