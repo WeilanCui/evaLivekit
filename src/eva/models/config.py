@@ -425,7 +425,7 @@ class RunConfig(BaseSettings):
     )
 
     # Framework selection
-    framework: Literal["pipecat", "openai_realtime", "gemini_live", "elevenlabs", "grok_voice"] = Field(
+    framework: Literal["pipecat", "openai_realtime", "gemini_live", "elevenlabs", "grok_voice", "livekit"] = Field(
         "pipecat",
         description=(
             "Agent framework to use for the assistant server."
@@ -444,7 +444,10 @@ class RunConfig(BaseSettings):
     )
 
     # Data paths
-    domain: Literal["airline", "itsm", "medical_hr"] = "airline"
+    domain: str = Field(
+        "airline",
+        description="Dataset/agent domain; resolves data paths under data/<domain>_*.",
+    )
 
     # Rerun settings
     max_rerun_attempts: int = Field(3, ge=0, le=20, description="Maximum number of rerun attempts for failed records")

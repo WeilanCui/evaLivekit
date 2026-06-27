@@ -59,7 +59,7 @@ def is_agent_timeout_on_user_turn(
     audio_timestamps_assistant_turns: dict[int, list[tuple[float, float]]],
 ) -> bool:
     """True if conversation ended with inactivity_timeout and the user spoke last."""
-    if conversation_ended_reason != "inactivity_timeout":
+    if conversation_ended_reason not in ("inactivity_timeout", "timeout"):
         return False
     return last_audio_speaker(audio_timestamps_user_turns, audio_timestamps_assistant_turns) == "user"
 

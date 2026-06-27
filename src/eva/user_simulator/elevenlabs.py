@@ -78,7 +78,11 @@ class ElevenLabsUserSimulator(AbstractUserSimulator):
 
         # Keep-alive inactivity detection
         self._consecutive_keepalive_count = 0
-        self._max_consecutive_keepalives = 12  # End call after this many pings without activity (2 minutes)
+        # The livekit bridge has no separate idle cap, so bound how long EVA waits
+        # on a silent agent before scoring; other frameworks keep the 2-minute cap.
+        self._max_consecutive_keepalives = (
+            5 if os.environ.get("EVA_FRAMEWORK") == "livekit" else 12
+        )
 
     async def run_conversation(self) -> str:
         """Run the conversation until completion.

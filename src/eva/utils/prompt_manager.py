@@ -19,6 +19,21 @@ from eva.utils.logging import get_logger
 logger = get_logger(__name__)
 
 
+def _deep_merge(dst: dict, src: dict) -> dict:
+    """Recursively merge ``src`` into ``dst`` (in place) and return ``dst``.
+
+    Nested dicts are merged rather than overwritten, so prompts split across
+    multiple YAML files that share a top-level section (e.g. ``user_simulator``)
+    combine instead of one file clobbering the other's keys.
+    """
+    for key, value in src.items():
+        if isinstance(value, dict) and isinstance(dst.get(key), dict):
+            _deep_merge(dst[key], value)
+        else:
+            dst[key] = value
+    return dst
+
+
 class PromptManager:
     """Manages prompts loaded from YAML files with dynamic variable substitution.
 
@@ -65,7 +80,7 @@ class PromptManager:
         try:
             with open(file_path, encoding="utf-8") as f:
                 data = yaml.safe_load(f) or {}
-            self.prompts.update(data)
+            _deep_merge(self.prompts, data)
             self.loaded_files.append(file_path)
             logger.info(f"Loaded prompts from {file_path}")
         except Exception as e:
