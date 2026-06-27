@@ -183,7 +183,14 @@ def _names_for(
     romanized_culture_overrides: dict | None,
     language: str,
 ) -> tuple[str, str, str, str]:
-    if not culture_overrides or language not in culture_overrides:
+    # No culture data at all → opt out of name substitution (scenarios that don't
+    # use the name-placeholder system, e.g. prose-persona domains). Mirrors the
+    # graceful empty return of _phone_for / _companion_for. A populated
+    # culture_overrides that is merely missing the run language is still a loud
+    # misconfiguration, so that case keeps raising.
+    if not culture_overrides:
+        return "", "", "", ""
+    if language not in culture_overrides:
         raise KeyError(
             f"culture_overrides missing entry for language {language!r}. Available: {list(culture_overrides or [])}."
         )

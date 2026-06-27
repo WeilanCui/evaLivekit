@@ -560,17 +560,24 @@ class MetricsRunner:
             agent_instructions = record.agent_override.instructions
 
         language = self._run_language
-        resolved_user_goal = resolve_user_goal(
-            record.user_goal,
-            record.culture_overrides,
-            language,
-            record.romanized_culture_overrides,
-            record.starting_utterances,
-            aliases_dir=self._aliases_path,
-        )
-        resolved_user_config = resolve_user_config(
-            record.user_config, record.culture_overrides, language, record.romanized_culture_overrides
-        )
+        # Culture/placeholder resolution is opt-in (mirrors the orchestrator's
+        # worker): records without culture_overrides carry their goal/config as
+        # authored, so scoring context loads for prose-persona scenarios too.
+        if record.culture_overrides:
+            resolved_user_goal = resolve_user_goal(
+                record.user_goal,
+                record.culture_overrides,
+                language,
+                record.romanized_culture_overrides,
+                record.starting_utterances,
+                aliases_dir=self._aliases_path,
+            )
+            resolved_user_config = resolve_user_config(
+                record.user_config, record.culture_overrides, language, record.romanized_culture_overrides
+            )
+        else:
+            resolved_user_goal = record.user_goal
+            resolved_user_config = record.user_config
         user_persona = resolved_user_config["user_persona"]
 
         initial_scenario_db = json.loads(initial_db_text)

@@ -326,43 +326,52 @@ class ConversationWorker:
         await self._assistant_server.start()
 
     def _materialize_resolved_scenario_db(self) -> Path:
-        """Load the placeholdered scenario DB.
+        """Load the scenario DB and write it into ``output_dir`` for the runtime.
 
-        Resolve names for the configured
-        language, and write it into ``output_dir`` for the assistant runtime.
+        Culture/placeholder resolution is opt-in: only records that define
+        ``culture_overrides`` go through name substitution. Records without it
+        (e.g. prose-persona scenarios) use the scenario DB as authored.
         """
         with open(self.scenario_db_path) as f:
             db = json.load(f)
-        resolved = resolve_scenario_db(
-            db,
-            self.record.culture_overrides,
-            self.config.language,
-            self.record.romanized_culture_overrides,
-            aliases_dir=self.config.aliases_path,
-        )
+        if self.record.culture_overrides:
+            db = resolve_scenario_db(
+                db,
+                self.record.culture_overrides,
+                self.config.language,
+                self.record.romanized_culture_overrides,
+                aliases_dir=self.config.aliases_path,
+            )
         out = self.output_dir / "scenario_db.json"
         out.parent.mkdir(parents=True, exist_ok=True)
         with open(out, "w", encoding="utf-8") as f:
-            json.dump(resolved, f, ensure_ascii=False, indent=2)
+            json.dump(db, f, ensure_ascii=False, indent=2)
         return out
 
     async def _start_user_simulator(self) -> None:
         """Start the user simulator."""
         language = self.config.language
-        resolved_goal = resolve_user_goal(
-            self.record.user_goal,
-            self.record.culture_overrides,
-            language,
-            self.record.romanized_culture_overrides,
-            self.record.starting_utterances,
-            aliases_dir=self.config.aliases_path,
-        )
-        resolved_persona = resolve_user_config(
-            self.record.user_config,
-            self.record.culture_overrides,
-            language,
-            self.record.romanized_culture_overrides,
-        )
+        # Culture/placeholder resolution is opt-in (see
+        # _materialize_resolved_scenario_db). Records without culture_overrides
+        # carry their persona/goal (and inline starting_utterance) as authored.
+        if self.record.culture_overrides:
+            resolved_goal = resolve_user_goal(
+                self.record.user_goal,
+                self.record.culture_overrides,
+                language,
+                self.record.romanized_culture_overrides,
+                self.record.starting_utterances,
+                aliases_dir=self.config.aliases_path,
+            )
+            resolved_persona = resolve_user_config(
+                self.record.user_config,
+                self.record.culture_overrides,
+                language,
+                self.record.romanized_culture_overrides,
+            )
+        else:
+            resolved_goal = self.record.user_goal
+            resolved_persona = self.record.user_config
         self._user_simulator = create_user_simulator(
             self.config.user_simulator,
             current_date_time=self.record.current_date_time,
