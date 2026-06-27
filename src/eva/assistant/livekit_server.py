@@ -440,6 +440,21 @@ class LiveKitAssistantServer(AbstractAssistantServer):
             )
         )
 
+        def _pump_done(t: asyncio.Task) -> None:
+            if t.cancelled():
+                logger.info(f"[{self.conversation_id}] agent pump task CANCELLED")
+            elif t.exception() is not None:
+                logger.error(
+                    f"[{self.conversation_id}] agent pump task FAILED: "
+                    f"{t.exception()!r}"
+                )
+            else:
+                logger.info(
+                    f"[{self.conversation_id}] agent pump task ENDED (stream closed)"
+                )
+
+        self._agent_subscriber_task.add_done_callback(_pump_done)
+
     # ---- Transcript capture ---------------------------------------------
 
     def _on_transcription_stream(
@@ -650,14 +665,20 @@ class LiveKitAssistantServer(AbstractAssistantServer):
             while len(carry) >= _MULAW_CHUNK_SIZE and self._outbound_mulaw is not None:
                 chunk = bytes(carry[:_MULAW_CHUNK_SIZE])
                 del carry[:_MULAW_CHUNK_SIZE]
-                try:
-                    self._outbound_mulaw.put_nowait(chunk)
-                except asyncio.QueueFull:
+                # Bounded ring buffer: when full, drop the OLDEST queued chunk and
+                # enqueue the newest, so the caller hears near-real-time audio
+                # (stale audio breaks the user simulator's turn detection). The
+                # previous logic enqueued every chunk twice and raised an unguarded
+                # QueueFull that killed this task mid-utterance.
+                if self._outbound_mulaw.full():
                     try:
                         self._outbound_mulaw.get_nowait()
                     except asyncio.QueueEmpty:
                         pass
-                self._outbound_mulaw.put_nowait(chunk)
+                try:
+                    self._outbound_mulaw.put_nowait(chunk)
+                except asyncio.QueueFull:
+                    pass
 
     async def _capture_inbound_to_room(self) -> None:
         """Drain decoded caller frames into the LiveKit audio source.
@@ -682,7 +703,14 @@ class LiveKitAssistantServer(AbstractAssistantServer):
             return
 
     async def _send_outbound_to_eva(self) -> None:
-        """Drain the outbound queue at 20 ms cadence, sending Twilio `media` frames."""
+        """Drain the outbound queue at real-time (20 ms) cadence, sending Twilio
+        `media` frames. Pace by wall clock rather than sleeping a fixed 20 ms
+        AFTER each send — the latter makes the per-chunk cycle (send + 20 ms) run
+        slower than real time, so the queue backs up and audio lags further behind
+        with every chunk.
+        """
+        loop = asyncio.get_event_loop()
+        next_send = loop.time()
         try:
             while True:
                 chunk = await self._outbound_mulaw.get()  # type: ignore[union-attr]
@@ -694,7 +722,14 @@ class LiveKitAssistantServer(AbstractAssistantServer):
                     )
                 except Exception:
                     return
-                await asyncio.sleep(_MULAW_CHUNK_DURATION_S)
+                next_send += _MULAW_CHUNK_DURATION_S
+                delay = next_send - loop.time()
+                if delay > 0:
+                    await asyncio.sleep(delay)
+                else:
+                    # Fell behind (send overhead exceeded the budget) — resync so
+                    # we don't accumulate drift.
+                    next_send = loop.time()
         except asyncio.CancelledError:
             return
 
