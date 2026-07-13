@@ -519,9 +519,15 @@ class LiveKitAssistantServer(AbstractAssistantServer):
             if not is_user and self._fw_log:
                 # Per-assistant-turn events for the metrics processor. User turns
                 # are recovered from the user-simulator events on the other side.
+                # The text must be logged as tts_text (or llm_response): the
+                # processor's _load_pipecat_logs drops s2s_transcript entries,
+                # leaving intended_assistant_turns empty — which makes it filter
+                # EVERY audit-log assistant turn as "unsaid" and fail the record
+                # with "no assistant or user turns found". These segments are the
+                # agent's own transcription of its spoken audio, i.e. tts_text.
                 self._fwlog_turn_counter += 1
                 self._fw_log.turn_start(timestamp_ms=start_ts_ms)
-                self._fw_log.s2s_transcript(text, timestamp_ms=end_ts_ms)
+                self._fw_log.tts_text(text, timestamp_ms=end_ts_ms)
                 self._fw_log.turn_end(was_interrupted=False, timestamp_ms=end_ts_ms)
         except Exception:
             logger.exception(
