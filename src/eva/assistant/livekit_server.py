@@ -391,6 +391,21 @@ class LiveKitAssistantServer(AbstractAssistantServer):
 
         self._room = rtc.Room()
         self._room.on("track_subscribed", self._on_track_subscribed)
+
+        # When the agent hangs up (its end_call tool deletes the room / leaves),
+        # EVA has no way to learn the call ended: its user simulator would idle
+        # until the ElevenLabs session times out (~7 min) and then retry the
+        # record. Close EVA's socket instead so the conversation ends promptly.
+        def _on_participant_disconnected(p: rtc.RemoteParticipant) -> None:
+            # The only remote participant is the dispatched agent; the bridge
+            # itself joins as "sip-<room>".
+            if not p.identity.startswith("sip-"):
+                self._signal_call_ended(f"agent {p.identity} left the room")
+
+        self._room.on("participant_disconnected", _on_participant_disconnected)
+        self._room.on(
+            "disconnected", lambda *_: self._signal_call_ended("room disconnected")
+        )
         # Capture transcriptions the agent forwards into the room. Registered
         # before connect() so we don't miss the agent's on_enter greeting.
         self._room.register_text_stream_handler(
@@ -770,6 +785,28 @@ class LiveKitAssistantServer(AbstractAssistantServer):
 
     # ---- Teardown --------------------------------------------------------
 
+    def _signal_call_ended(self, why: str) -> None:
+        """Close EVA's WebSocket once the LiveKit side of the call is gone.
+
+        Closing the socket is the Twilio-protocol way to end the call: EVA's
+        audio bridge treats it as a disconnect and ends the user-simulator
+        session immediately. Idempotent — cleanup paths where EVA hung up
+        first find _ws already None.
+        """
+        ws = self._ws
+        if ws is None:
+            return
+        self._ws = None
+        logger.info(f"[{self.conversation_id}] {why} — closing EVA WebSocket")
+
+        async def _close() -> None:
+            try:
+                await ws.close(code=1000)
+            except Exception:
+                pass
+
+        asyncio.create_task(_close())
+
     async def _cleanup_livekit(self) -> None:
         # Flush transcripts first — needs the room still connected so pending
         # read_all() calls can complete before we disconnect.
@@ -794,6 +831,10 @@ class LiveKitAssistantServer(AbstractAssistantServer):
                 await self._lk_api.room.delete_room(
                     api.DeleteRoomRequest(room=self._room_name)
                 )
+            except api.TwirpError as e:
+                # not_found is routine: the agent's hangup already deleted it.
+                if e.code != "not_found":
+                    logger.exception("error deleting room")
             except Exception:
                 logger.exception("error deleting room")
         if self._lk_api:
