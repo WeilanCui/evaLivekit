@@ -333,7 +333,9 @@ class TextJudgeMetric(BaseMetric):
     # 16384 is the gpt-4o judge's completion-token cap; the upstream default of
     # 100000 raises BadRequestError on it. The cap bounds only the JUDGE'S
     # RESPONSE LENGTH, not the transcript being scored, so it doesn't affect scores.
-    default_params: dict[str, Any] = {"max_tokens": 16384, "service_tier": "flex"}
+    # No service_tier: the OpenAI-only "flex" tier is rejected by newer models
+    # (gpt-5.x: "Invalid service_tier argument") and by non-OpenAI judges.
+    default_params: dict[str, Any] = {"max_tokens": 16384}
     rating_scale: tuple[int, int] = (1, 3)  # (min, max)
 
     def __init__(self, config: dict[str, Any] | None = None):
