@@ -38,6 +38,7 @@ Dev / staging only — never run with prod LiveKit credentials.
 from __future__ import annotations
 
 import asyncio
+import audioop
 import json
 import os
 import secrets
@@ -77,6 +78,14 @@ _FRAME_BYTES = _FRAME_SAMPLES * 2  # 960
 # Twilio media frames are 160 bytes (20 ms @ 8 kHz mulaw, 1 byte/sample).
 _MULAW_CHUNK_SIZE = 160
 _MULAW_CHUNK_DURATION_S = 0.02
+
+# Speech gate for agent→EVA forwarding (see _pump_agent_audio_to_eva). WebRTC
+# inter-utterance silence decodes to (near-)zero samples while real speech
+# peaks in the thousands, so a small int16 peak threshold separates them. The
+# hangover keeps chunks flowing through brief intra-utterance pauses so EVA's
+# chunk-arrival speech detector doesn't see them as turn boundaries.
+_SPEECH_PEAK_THRESHOLD = 200
+_SPEECH_HANGOVER_S = 0.4
 
 # LiveKit Agents forwards transcriptions over a text stream on this topic, one
 # stream per speech segment (see livekit.agents.voice.room_io._output). Mirrors
@@ -636,23 +645,40 @@ class LiveKitAssistantServer(AbstractAssistantServer):
         A separate sender task drains the queue at 20 ms cadence so we don't
         blast EVA's WebSocket faster than real time (its user simulator relies
         on real-time pacing for turn detection).
+
+        Forwarding is speech-gated: a WebRTC track is a continuous media stream
+        that keeps emitting silence frames between utterances, but EVA's user
+        simulator infers "assistant is speaking" from chunk ARRIVAL (its pipecat
+        assistants only send audio while talking). Forwarding the silence
+        latches that flag forever: no assistant audio START/END events, no
+        model-response latency, and the keepalive inactivity watchdog never
+        fires. So frames are only forwarded while they carry speech energy
+        (plus a short hangover so trailing syllables aren't clipped); the
+        recording buffers still get every frame.
         """
         carry = bytearray()
+        loop = asyncio.get_event_loop()
+        last_speech_time: float | None = None
         async for ev in audio_stream:
             pcm_bytes = bytes(ev.frame.data)
-            # First agent audio after a user turn → record model-response latency.
-            if not self._bot_speaking:
-                self._bot_speaking = True
-                if (
-                    self._user_speech_stopped_wall_ms is not None
-                    and self._metrics_log
-                ):
-                    latency_ms = _wall_ms() - self._user_speech_stopped_wall_ms
-                    if 0 < latency_ms < 30_000:
-                        self._metrics_log.write_latency(
-                            "model_response", latency_ms / 1000, self._service_name
-                        )
-                    self._user_speech_stopped_wall_ms = None
+            speech = audioop.max(pcm_bytes, 2) >= _SPEECH_PEAK_THRESHOLD
+            if speech:
+                last_speech_time = loop.time()
+                # First agent speech after a user turn → model-response latency.
+                if not self._bot_speaking:
+                    self._bot_speaking = True
+                    if (
+                        self._user_speech_stopped_wall_ms is not None
+                        and self._metrics_log
+                    ):
+                        latency_ms = _wall_ms() - self._user_speech_stopped_wall_ms
+                        if 0 < latency_ms < 30_000:
+                            self._metrics_log.write_latency(
+                                "model_response",
+                                latency_ms / 1000,
+                                self._service_name,
+                            )
+                        self._user_speech_stopped_wall_ms = None
             # Keep tracks aligned: pad the user track to the assistant position
             # before extending the assistant track (unless the user is speaking).
             if not self._user_speaking:
@@ -660,6 +686,15 @@ class LiveKitAssistantServer(AbstractAssistantServer):
                     self.user_audio_buffer, len(self.assistant_audio_buffer)
                 )
             self.assistant_audio_buffer.extend(pcm_bytes)
+            in_hangover = (
+                last_speech_time is not None
+                and loop.time() - last_speech_time <= _SPEECH_HANGOVER_S
+            )
+            if not speech and not in_hangover:
+                # Inter-utterance gap — drop any sub-chunk tail so stale audio
+                # isn't glued onto the front of the next utterance.
+                carry.clear()
+                continue
             mulaw = pcm16_24k_to_mulaw_8k(pcm_bytes)
             carry.extend(mulaw)
             while len(carry) >= _MULAW_CHUNK_SIZE and self._outbound_mulaw is not None:
